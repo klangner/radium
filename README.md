@@ -1,6 +1,6 @@
 # Chemistry
 
-Radium is Haskell library for chemistry
+Radium is Haskell library for chemistry.
 
 ## Installation
 The library can be installed from [Hackage](http://hackage.haskell.org/package/raduim) with the command:

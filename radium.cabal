@@ -1,4 +1,4 @@
-name:           Radium
+name:           radium
 version:        0.1
 cabal-version:  >= 1.10
 build-type:     Simple

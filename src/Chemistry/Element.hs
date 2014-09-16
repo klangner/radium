@@ -3,8 +3,8 @@ module Chemistry.Element ( Element
                          , element
                          , elementByAtomNumber
                          , shellElectrons
-                         , valenceElectronCount
-                         , valenceBoundCount 
+                         , valanceElectronCount
+                         , valanceBoundCount 
                          ) where
 
 
@@ -102,9 +102,9 @@ elements = [ Element 1 "H" "Hydrogen" 1.008
             -- Po  Polonium        84  208,9824 
             -- At  Astatine        85  209,9871 
             , Element 86 "Rn" "Radon" 222.0176 
-            -- Fr  Francium        87  223,0197 
-            -- Ra  Radium      88  226,0254 
-            -- Ac  Actinium        89  227,0278 
+            , Element 87 "Fr" "Francium" 223.0197 
+            , Element 88 "Ra" "Radium" 226.0254 
+            , Element 89 "Ac" "Actinium" 227.0278 
             , Element 90 "Th" "Thorium" 232.0381 
             -- Pa  Protactinium        91  231,0359 
             -- U   Uranium         92  238,0289 
@@ -141,7 +141,7 @@ elementByAtomNumber :: Int -> Maybe Element
 elementByAtomNumber n = f n elements
     where f :: Int -> [Element] -> Maybe Element
           f _ [] = Nothing
-          f x (e:es) | (atomicNumber e) == x = Just e
+          f x (e:es) | atomicNumber e == x = Just e
                      | otherwise = f x es
 
 -- | Find element by its symbol
@@ -149,7 +149,7 @@ element :: String -> Maybe Element
 element ns = f ns elements
     where f :: String -> [Element] -> Maybe Element
           f _ [] = Nothing
-          f xs (e:es) | (symbol e) == xs = Just e
+          f xs (e:es) | symbol e == xs = Just e
                      | otherwise = f xs es
 
 -- | Show number of electrons in each shell
@@ -157,17 +157,17 @@ shellElectrons :: Element -> [Int]
 shellElectrons e = filter (> 0) $ f (fillShells (atomicNumber e)) 
         where f :: [(Int, Int, Int)] -> [Int]
               f ss = [sum (g n ss) | n <- [1..m]]
-                where m = ((length ss) + 1) `div` 2
+                where m = (length ss + 1) `div` 2
                       g l = map (\(a,_,c) -> if a == l then c else 0)
                       
 -- | Number of valance electrons
-valenceElectronCount :: Element -> Int
-valenceElectronCount e = head $ reverse (shellElectrons e)
+valanceElectronCount :: Element -> Int
+valanceElectronCount e = last (shellElectrons e)
 
 -- | Number of bounds in element
-valenceBoundCount :: Element -> Int
-valenceBoundCount e = min n (8-n)
-    where n = valenceElectronCount e
+valanceBoundCount :: Element -> Int
+valanceBoundCount e = min n (8-n)
+    where n = valanceElectronCount e
 
 
 -- How many electrons are in each subshell
@@ -185,12 +185,12 @@ fillShells :: Int -> [( Int  -- Shell number
                       , Int  -- Shell type
                       , Int  -- #Electrons
                       )]
-fillShells n = f (shellConfigGen 5) n
+fillShells = f (shellConfigGen 5)
         where f :: [(Int, Int)] -> Int -> [(Int, Int, Int)]
               f [] _ = []
               f ((i,j):xs) m | m == 0 = []
                              | m < l = [(i, j, m)]
-                             | otherwise = (i, j, l) : (f xs (m-l))
+                             | otherwise = (i, j, l) : f xs (m - l)
                              where l = subshellMaxElectrons !! (j-1)  
                                    
                  

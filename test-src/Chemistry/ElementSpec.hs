@@ -27,8 +27,8 @@ spec = do
         let n = fmap valanceElectronCount $ element "Cs"
         n `shouldBe` Just 1
 
-  describe "Count bounds" $ 
+  describe "Count covalent bounds" $ 
     it "Caesium has 1 bound" $ do
-        let n = fmap valanceBoundCount $ element "Cs"
+        let n = fmap covalentBounds $ element "Cs"
         n `shouldBe` Just 1
         

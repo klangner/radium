@@ -4,7 +4,7 @@ module Chemistry.Element ( Element
                          , elementByAtomNumber
                          , shellElectrons
                          , valanceElectronCount
-                         , valanceBoundCount 
+                         , covalentBounds 
                          ) where
 
 
@@ -164,9 +164,9 @@ shellElectrons e = filter (> 0) $ f (fillShells (atomicNumber e))
 valanceElectronCount :: Element -> Int
 valanceElectronCount e = last (shellElectrons e)
 
--- | Number of bounds in element
-valanceBoundCount :: Element -> Int
-valanceBoundCount e = min n (8-n)
+-- | Number of covalent bounds in element
+covalentBounds :: Element -> Int
+covalentBounds e = min n (8-n)
     where n = valanceElectronCount e
 
 

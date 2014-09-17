@@ -1,18 +1,18 @@
 module Chemistry.Element ( Element
-                       , atomicNumber
-                       , element
-                       , elementBySymbol
-                       , shellElectrons
-                       , valanceElectrons
-                       , covalentBounds 
-                         ) where
+                         , atomicNumber
+                         , element
+                         , elementBySymbol
+                         , shellElectrons
+                         , valanceElectrons
+                         , covalentBounds ) where
 
 
 data Element = Element { atomicNumber :: Int
                        , symbol :: String
                        , _name :: String
                        , _weight :: Double 
-                       } deriving Show
+                       } 
+             | Unknown deriving (Eq, Show)
             
 ptable :: [Element]
 ptable = [ Element 1 "H" "Hydrogen" 1.008 
@@ -44,115 +44,115 @@ ptable = [ Element 1 "H" "Hydrogen" 1.008
          , Element 27 "Co" "Cobalt" 58.933
          , Element 28 "Ni" "Nickel" 58.6934
          , Element 29 "Cu" "Copper" 63.546
-            -- Zn  Zinc        30  65,39 
-            -- Ga  Gallium         31  69,723 
-            -- Ge  Germanium       32  72,61 
-            -- As  Arsenic         33  74,92159 
-            -- Se  Selenium        34  78,96 
-            -- Br  Bromine     35  79,904 
-            -- Kr  Krypton         36  83,8 
-            -- Rb  Rubidium        37  85,4678 
-            -- Sr  Strontium       38  87,62 
-            -- Y   Yttrium         39  88,90585 
-            -- Zr  Zirconium       40  91,224 
-            -- Nb  Niobium         41  92,90638 
-            -- Mo  Molybdenum      42  95,94 
-          , Element  43 "Tc" "Technetium" 98.9063 
-            -- Ru  Ruthenium       44  101,07 
-            -- Rh  Rhodium         45  102,9055 
-            -- Pd  Palladium       46  106,42 
-            -- Ag  Silver  47  107,8682 
-            -- Cd  Cadmium         48  112,411 
-            -- In  Indium      49  114,82 
-            -- Sn  Tin     Latin Stannum   50  118,71 
-            -- Sb  Antimony   51  121,75 
-            -- Te  Tellurium       52  127,6 
-            -- I   Iodine      53  126,90447 
-            -- Xe  Xenon       54  131,29 
-          , Element 55 "Cs" "Caesium" 132.90543 
-          , Element 56 "Ba" "Barium" 137.327 
-          , Element 57 "La" "Lanthanum" 138.9055 
-          , Element 58 "Ce" "Cerium" 140.115 
-          , Element 59 "Pr" "Praseodymium" 140.90765 
-          , Element 60 "Nd" "Neodymium" 144.24 
-          , Element 61 "Pm" "Promethium" 146.9151 
-            -- Sm  Samarium        62  150,36 
-            -- Eu  Europium        63  151,965 
-            -- Gd  Gadolinium      64  157,25 
-            -- Tb  Terbium         65  158,92534 
-            -- Dy  Dysprosium      66  162,5 
-            -- Ho  Holmium         67  164,93032 
-            -- Er  Erbium      68  167,26 
-            -- Tm  Thulium         69  168,93421 
-            -- Yb  Ytterbium       70  173,04 
-            -- Lu  Lutetium        71  174,967 
-            -- Hf  Hafnium         72  178,49 
-          , Element  73 "Ta" "Tantalum" 180.9479 
-            -- W   Tungsten    German Wolfram  74  183,85 
-            -- Re  Rhenium         75  186,207 
-            -- Os  Osmium      76  190,2 
-            -- Ir  Iridium         77  192,22 
-            -- Pt  Platinum        78  195,08 
-            -- Au  Gold    Latin Aurum     79  196,96654  
+         , Element 30 "Zn" "Zinc" 65.39 
+         , Element 31 "Ga" "Gallium" 69.723 
+         , Element 32 "Ge" "Germanium" 72.61 
+         , Element 33 "As" "Arsenic" 74.92159 
+         , Element 34 "Se" "Selenium" 78.96 
+         , Element 35 "Br" "Bromine" 79.904 
+         , Element 36 "Kr" "Krypton" 83.8 
+         , Element 37 "Rb" "Rubidium" 85.4678 
+         , Element 38 "Sr" "Strontium" 87.62 
+         , Element 39 "Y" "Yttrium" 88.90585 
+         , Element 40 "Zr" "Zirconium" 91.224 
+         , Element 41 "Nb" "Niobium" 92.90638 
+         , Element 42 "Mo" "Molybdenum" 95.94 
+         , Element 43 "Tc" "Technetium" 98.9063 
+         , Element 44 "Ru" "Ruthenium" 101.07 
+         , Element 45 "Rh" "Rhodium" 102.9055 
+         , Element 46 "Pd" "Palladium" 106.42 
+         , Element 47 "Ag" "Silver" 107.8682 
+         , Element 48 "Cd" "Cadmium" 112.411 
+         , Element 49 "In" "Indium" 114.82 
+         , Element 50 "Sn" "Tin" 118.71 
+         , Element 51 "Sb" "Antimony" 121.75 
+         , Element 52 "Te" "Tellurium" 127.6 
+         , Element 53 "I" "Iodine" 126.90447 
+         , Element 54 "Xe" "Xenon" 131.29 
+         , Element 55 "Cs" "Caesium" 132.90543 
+         , Element 56 "Ba" "Barium" 137.327 
+         , Element 57 "La" "Lanthanum" 138.9055 
+         , Element 58 "Ce" "Cerium" 140.115 
+         , Element 59 "Pr" "Praseodymium" 140.90765 
+         , Element 60 "Nd" "Neodymium" 144.24 
+         , Element 61 "Pm" "Promethium" 146.9151 
+         , Element 62 "Sm" "Samarium" 150.36 
+         , Element 63 "Eu" "Europium" 151.965 
+         , Element 64 "Gd" "Gadolinium" 157.25 
+         , Element 65 "Tb" "Terbium" 158.92534 
+         , Element 66 "Dy" "Dysprosium" 162.5 
+         , Element 67 "Ho" "Holmium" 164.93032 
+         , Element 68 "Er" "Erbium" 167.26 
+         , Element 69 "Tm" "Thulium" 168.93421 
+         , Element 70 "Yb" "Ytterbium" 173.04 
+         , Element 71 "Lu" "Lutetium" 174.967 
+         , Element 72 "Hf" "Hafnium" 178.49 
+         , Element 73 "Ta" "Tantalum" 180.9479 
+         , Element 74 "W" "Tungsten" 183.85 
+         , Element 75 "Re" "Rhenium" 186.207 
+         , Element 76 "Os" "Osmium" 190.2 
+         , Element 77 "Ir" "Iridium" 192.22 
+         , Element 78 "Pt" "Platinum" 195.08 
+         , Element 79 "Au" "Gold" 196.96654  
          , Element 80 "Hg" "Mercury" 200.59  
-            -- Tl  Thallium        81  204,3833 
-            -- Pb  Lead    Latin Plumbum   82  207,2 
-            -- Bi  Bismuth         83  208,98037 
-            -- Po  Polonium        84  208,9824 
-            -- At  Astatine        85  209,9871 
-          , Element 86 "Rn" "Radon" 222.0176 
-          , Element 87 "Fr" "Francium" 223.0197 
-          , Element 88 "Ra" "Radium" 226.0254 
-          , Element 89 "Ac" "Actinium" 227.0278 
-          , Element 90 "Th" "Thorium" 232.0381 
-            -- Pa  Protactinium        91  231,0359 
-            -- U   Uranium         92  238,0289 
-            -- Np  Neptunium       93  237,0482 
-            -- Pu  Plutonium       94  244,0642 
-            -- Am  Americium       95  243,0614 
-            -- Cm  Curium      96  247,0703 
-          , Element 97 "Bk" "Berkelium" 247.0703 
-            -- Cf  Californium         98  251,0796 
-            -- Es  Einsteinium         99  252,0829 
-            -- Fm  Fermium         100 257,0951 
-            -- Md  Mendelevium         101 258,0986 
-            -- No  Nobelium        102 259,1009 
-            -- Lr  Lawrencium      103 260,1053 
-          , Element  104 "Rf" "Rutherfordium" 261.1087 
-            -- Db  Dubnium         105 262,1138 
-            -- Sg  Seaborgium      106 263,1182 
-            -- Bh  Bohrium         107 262,1229 
-            -- Hs  Hassium         108 265 
-            -- Mt  Meitnerium      109 266 
-            -- Ds  Darmstadtium        110 269 
-            -- Rg  Roentgenium         111 272 
-          , Element 112 "Cn" "Copernicium" 285 
-          , Element 113 "Uut" "Ununtrium" 284 
-          , Element 114 "Uug" "Ununquadium" 289 
-          , Element 115 "Uup" "Ununpentium" 288 
-          , Element 116 "Uuh" "Ununhexium" 293 
-          , Element 117 "Uus" "Ununseptium" 294     
-          , Element 118 "Uuo" "Ununoctium" 294 ]
+         , Element 81 "Tl" "Thallium" 204.3833 
+         , Element 82 "Pb" "Lead" 207.2 
+         , Element 83 "Bi" "Bismuth" 208.98037 
+         , Element 84 "Po" "Polonium" 208.9824 
+         , Element 85 "At" "Astatine" 209.9871 
+         , Element 86 "Rn" "Radon" 222.0176 
+         , Element 87 "Fr" "Francium" 223.0197 
+         , Element 88 "Ra" "Radium" 226.0254 
+         , Element 89 "Ac" "Actinium" 227.0278 
+         , Element 90 "Th" "Thorium" 232.0381 
+         , Element 91 "Pa" "Protactinium" 231.0359 
+         , Element 92 "U" "Uranium" 238.0289 
+         , Element 93 "Np" "Neptunium" 237.0482 
+         , Element 94 "Pu" "Plutonium" 244.0642 
+         , Element 95 "Am" "Americium" 243.0614 
+         , Element 96 "Cm" "Curium" 247.0703 
+         , Element 97 "Bk" "Berkelium" 247.0703 
+         , Element 98 "Cf" "Californium" 251.0796 
+         , Element 99 "Es" "Einsteinium" 252.0829 
+         , Element 100 "Fm" "Fermium" 257.0951 
+         , Element 101 "Md" "Mendelevium" 258.0986 
+         , Element 102 "No" "Nobelium" 259.1009 
+         , Element 103 "Lr" "Lawrencium" 260.1053 
+         , Element 104 "Rf" "Rutherfordium" 261.1087 
+         , Element 105 "Db" "Dubnium" 262.1138 
+         , Element 106 "Sg" "Seaborgium" 263.1182 
+         , Element 107 "Bh" "Bohrium" 262.1229 
+         , Element 108 "Hs" "Hassium" 265 
+         , Element 109 "Mt" "Meitnerium" 266 
+         , Element 110 "Ds" "Darmstadtium" 269 
+         , Element 111 "Rg" "Roentgenium" 272 
+         , Element 112 "Cn" "Copernicium" 285 
+         , Element 113 "Uut" "Ununtrium" 284 
+         , Element 114 "Uug" "Ununquadium" 289 
+         , Element 115 "Uup" "Ununpentium" 288 
+         , Element 116 "Uuh" "Ununhexium" 293 
+         , Element 117 "Uus" "Ununseptium" 294     
+         , Element 118 "Uuo" "Ununoctium" 294 ]
            
 
 -- | Find element by its atomic number
 --
--- > fmap atomicNumber (element 8) == Just 8 
-element :: Int -> Maybe Element
+-- > atomicNumber (element 8) == 8 
+element :: Int -> Element
 element n = f n ptable
-    where f :: Int -> [Element] -> Maybe Element
-          f _ [] = Nothing
-          f x (e:es) | atomicNumber e == x = Just e
+    where f :: Int -> [Element] -> Element
+          f _ [] = Unknown
+          f x (e:es) | atomicNumber e == x = e
                      | otherwise = f x es
 
 -- | Find element by its symbol
 --
--- > fmap atomicNumber (elementBySymbol "O") == Just 8 
-elementBySymbol :: String -> Maybe Element
+-- > atomicNumber (elementBySymbol "O") == 8 
+elementBySymbol :: String -> Element
 elementBySymbol ns = f ns ptable
-    where f :: String -> [Element] -> Maybe Element
-          f _ [] = Nothing
-          f xs (e:es) | symbol e == xs = Just e
+    where f :: String -> [Element] -> Element
+          f _ [] = Unknown
+          f xs (e:es) | symbol e == xs = e
                      | otherwise = f xs es
 
 -- | Show number of electrons in each shell

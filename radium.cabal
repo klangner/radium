@@ -17,6 +17,8 @@ description:
     This library simplifies writing application for chemistry. Currently includes:
     .
     * Element - Periodic table and basic information about elements
+    .
+    * Formula - Formula parser. Formula can be provided as Ce3FeO2
 
 source-repository head
   type:     git
@@ -27,10 +29,12 @@ library
   default-language: Haskell2010
   ghc-options:      -Wall
   build-depends:    
-                    base >= 4 && <4.7
+                    base >= 4 && <4.7,
+                    parsec >=3.1.3 && <3.2
+
   exposed-modules:  
                     Chemistry.Element,
-                    Chemistry.Molecule
+                    Chemistry.Formula
   other-modules:    
 
 test-suite unit-tests
@@ -41,7 +45,9 @@ test-suite unit-tests
                     base >= 4 && <4.7,
                     hspec >=1.8 && <1.9,
                     QuickCheck >=2.6 && <2.7,
-                    Cabal >=1.16.0 && <1.17
+                    Cabal >=1.16.0 && <1.17,
+                    parsec >=3.1.3 && <3.2
+
   hs-source-dirs:  
                     src,
                     test-src

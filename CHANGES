@@ -1,5 +1,7 @@
-Version 0.2 
-* 
+Version 0.3
+
+Version 0.2 2014-09-17
+* Added formula parser
 
 Version 0.1 2014-09-16 
 * Added calculation for valence electrons and bounds

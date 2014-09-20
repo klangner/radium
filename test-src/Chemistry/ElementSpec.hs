@@ -17,15 +17,15 @@ spec = do
 
   describe "Count shell electrons" $ 
     it "Radium has 7 shells" $ 
-        shellElectrons (elementBySymbol "Ra") `shouldBe` [2, 8, 18, 32, 18, 8, 2]
+        electronConfig (elementBySymbol "Ra") `shouldBe` [2, 8, 18, 32, 18, 8, 2]
 
   describe "Count shell electrons" $ 
     it "Calcium has " $ 
-        shellElectrons (element 19) `shouldBe` [2, 8, 8, 1]
+        electronConfig (element 19) `shouldBe` [2, 8, 8, 1]
 
   describe "Count shell electrons in metal" $ 
     it "Chromium has " $ 
-        shellElectrons (element 24) `shouldBe` [2, 8, 13, 1]
+        electronConfig (element 24) `shouldBe` [2, 8, 13, 1]
 
   describe "Count valance electrons" $ 
     it "Caesium has 1 valance electron" $ 

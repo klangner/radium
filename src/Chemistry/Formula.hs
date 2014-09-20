@@ -10,7 +10,7 @@ data Formula = Formula [(Element, Int)] deriving (Eq, Show)
 
 -- | Parse formula 
 --
--- > parseFormula "C2H4" `shouldBe` Formula [("C", 2), ("H", 4)]  
+-- > parseFormula "C2H4" `shouldBe` Formula [(element 6, 2), (element 1, 4)]  
 
 parseFormula :: String -> Formula
 parseFormula xs = case parse formula "" xs of

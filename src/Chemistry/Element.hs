@@ -5,6 +5,8 @@ module Chemistry.Element ( Element
                          , elementBySymbol
                          , valanceElectrons
                          , covalentBounds ) where
+                         
+import qualified Data.Map as Map                       
 
 
 data Element = Element { atomicNumber :: Int
@@ -158,6 +160,27 @@ elementBySymbol ns = f ns ptable
           f xs (e:es) | symbol e == xs = e
                      | otherwise = f xs es
 
+-- Electron configuration exceptions to Aufbau principle
+configExceptions :: Map.Map Int [Int] 
+configExceptions = Map.fromList [ (24, [2, 8, 13, 1])
+                                , (29, [2, 8, 18, 1]) 
+                                , (41, [2, 8, 18, 12, 1])
+                                , (42, [2, 8, 18, 13, 1])
+                                , (44, [2, 8, 18, 15, 1])
+                                , (45, [2, 8, 18, 16, 1])
+                                , (46, [2, 8, 18, 18])
+                                , (47, [2, 8, 18, 18, 1]) 
+                                , (57, [2, 8, 18, 18, 9, 2])
+                                , (58, [2, 8, 18, 19, 9, 2])
+                                , (64, [2, 8, 18, 25, 9, 2])
+                                , (79, [2, 8, 18, 32, 18, 1])
+                                , (89, [2, 8, 18, 32, 18, 9, 2])
+                                , (90, [2, 8, 18, 32, 18, 10, 2])
+                                , (91, [2, 8, 18, 32, 20, 9, 2])
+                                , (92, [2, 8, 18, 32, 21, 9, 2])
+                                , (93, [2, 8, 18, 32, 22, 9, 2]) 
+                                , (96, [2, 8, 18, 32, 25, 9, 2]) ]
+                                        
 -- | Show number of electrons in each shell
 --   For elements which are exception to Aufbau principle configuration is given manually
 --   Is it possible to calculate it for all elements based only on atom properties?             
@@ -165,13 +188,13 @@ elementBySymbol ns = f ns ptable
 -- > let e = element 8
 -- > shellElectrons e == [2, 6] 
 electronConfig :: Element -> [Int]
-electronConfig e | atomicNumber e == 24 = [2, 8, 13, 1]
-                 | atomicNumber e == 29 = [2, 8, 18, 1]
-                 | otherwise = filter (> 0) $ f (fillShells (atomicNumber e)) 
-                 where f :: [(Int, Int, Int)] -> [Int]
-                       f ss = [sum (g n ss) | n <- [1..m]]
-                        where m = length ss
-                              g l = map (\(a,_,c) -> if a == l then c else 0)
+electronConfig e = case Map.lookup (atomicNumber e) configExceptions of
+                    Just val -> val
+                    _ -> filter (> 0) $ f (fillShells (atomicNumber e)) 
+                        where f :: [(Int, Int, Int)] -> [Int]
+                              f ss = [sum (g n ss) | n <- [1..m]]
+                                where m = length ss
+                                      g l = map (\(a,_,c) -> if a == l then c else 0)
                       
 -- | Number of valance electrons
 --

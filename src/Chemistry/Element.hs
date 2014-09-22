@@ -1,5 +1,18 @@
+{- |
+Module : Chemistry.Element
+Copyright : Copyright (C) 2014 Krzysztof Langner
+License : BSD3
+
+Maintainer : Krzysztof Langner <klangner@gmail.com>
+Stability : alpha
+Portability : portable
+
+This module contains Periodic Table with information about all known elements.
+-}
+
 module Chemistry.Element ( Element
                          , atomicNumber
+                         , atomWeight
                          , electroNegativity
                          , ionizationEnergy
                          , electronConfig
@@ -14,7 +27,7 @@ import qualified Data.Map as Map
 data Element = Element { atomicNumber :: Int
                        , symbol :: String
                        , _name :: String
-                       , _weight :: Double 
+                       , atomWeight :: Double 
                        , electroNegativity :: Double
                        , ionizationEnergy :: Double
                        } 

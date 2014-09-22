@@ -1,3 +1,17 @@
+{- |
+Module : Chemistry.Formula
+Copyright : Copyright (C) 2014 Krzysztof Langner
+License : BSD3
+
+Maintainer : Krzysztof Langner <klangner@gmail.com>
+Stability : alpha
+Portability : portable
+
+Formula parser. 
+.
+Formula can be entered as H2O, SO4+2 (Sulfate) or (CH3)2CO (Acetone)
+-}
+
 module Chemistry.Formula ( Formula(..)
                           , parseFormula
                           ) where
@@ -6,7 +20,10 @@ import Text.ParserCombinators.Parsec
 import Chemistry.Element
 
 
-data Formula = Formula [(Element, Int)] deriving (Eq, Show)
+-- data Formula = Formula [(Element, Int)] deriving (Eq, Show)
+data Formula = FGroup [(Formula, Int)] 
+             | FElement Element 
+             deriving (Eq, Show)
 
 -- | Parse formula 
 --
@@ -14,23 +31,23 @@ data Formula = Formula [(Element, Int)] deriving (Eq, Show)
 
 parseFormula :: String -> Formula
 parseFormula xs = case parse formula "" xs of
-    Left _ -> Formula []
-    Right val -> Formula val
+    Left _ -> FGroup []
+    Right val -> FGroup val
 
 
 -- Parse whole formula
-formula :: Parser [(Element, Int)]
+formula :: Parser [(Formula, Int)]
 formula = many elementSymbol
     
 -- Parse element
 -- Element is max 3 letter long
 -- Starts with upper case
 -- has 0, 1 or 2 lower letters
-elementSymbol :: Parser (Element, Int)
+elementSymbol :: Parser (Formula, Int)
 elementSymbol = do
     l1 <- upper
     l2 <- many lower
-    let e = elementBySymbol (l1:l2) 
+    let e = FElement (elementBySymbol (l1:l2)) 
     ds <- many digit
     let n = if null ds then 1 else read ds :: Int
     return (e, n)

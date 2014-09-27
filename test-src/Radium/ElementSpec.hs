@@ -1,6 +1,6 @@
-module Chemistry.ElementSpec (spec) where
+module Radium.ElementSpec (spec) where
 
-import Chemistry.Element
+import Radium.Element
 import Test.Hspec
 
 

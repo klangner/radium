@@ -1,5 +1,5 @@
 {- |
-Module : Chemistry.Element
+Module Radium.Element
 Copyright : Copyright (C) 2014 Krzysztof Langner
 License : BSD3
 
@@ -10,16 +10,16 @@ Portability : portable
 This module contains Periodic Table with information about all known elements.
 -}
 
-module Chemistry.Element ( Element
-                         , atomicNumber
-                         , atomWeight
-                         , electroNegativity
-                         , ionizationEnergy
-                         , electronConfig
-                         , element
-                         , elementBySymbol
-                         , valanceElectrons
-                         , covalentBounds ) where
+module Radium.Element ( Element
+                      , atomicNumber
+                      , atomWeight
+                      , electroNegativity
+                      , ionizationEnergy
+                      , electronConfig
+                      , element
+                      , elementBySymbol
+                      , valanceElectrons
+                      , covalentBounds ) where
                          
 import qualified Data.Map as Map                       
 

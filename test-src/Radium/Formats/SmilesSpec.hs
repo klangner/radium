@@ -1,6 +1,5 @@
 module Radium.Formats.SmilesSpec (spec) where
 
-import Radium.Model
 import Radium.Formats.Smiles
 import Test.Hspec
 
@@ -8,7 +7,10 @@ import Test.Hspec
 spec :: Spec
 spec =
 
-  describe "Parse SMILES string" $ 
-    it "parse single atom" $ do
-        let (Atom s _) = parseSmiles "[Au]"  
-        s `shouldBe` "Au"
+  describe "Parse SMILES string" $ do 
+    it "parse single atom [Au]" $
+        readSmiles "[Au]" `shouldBe` Atom "Au"
+ 
+    it "parse water H2O" $
+        readSmiles "O" `shouldBe` Aliphatic "O" 
+        

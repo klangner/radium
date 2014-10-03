@@ -12,24 +12,40 @@ http://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system
 
 -}
 
-module Radium.Formats.Smiles where
+module Radium.Formats.Smiles (SmilesModel(..), readSmiles) where
 
 import Text.ParserCombinators.Parsec
-import Radium.Model
 
 
--- | This formated uses String model.
-type SmilesModel = ValenceModel String
+-- | This model describes molecules with valence bounds
+data SmilesModel = Atom String
+                 | Aliphatic String
+                 | Aromatic String
+                 | Empty
+                  deriving( Eq, Show )
+
 
 -- | Parses textual representation
-parseSmiles :: String -> SmilesModel
-parseSmiles xs = case parse atom "" xs of
+readSmiles :: String -> SmilesModel
+readSmiles xs = case parse atom "" xs of
     Left _ -> Empty
-    Right val -> Atom val []
+    Right val -> val
 
--- Parse ion
-atom :: Parser String
-atom = between (char '[') (char ']') symbol
+-- Parse atom
+atom :: Parser SmilesModel
+atom = bracketAtom <|> aliphaticOrganic
+
+-- Parse atom
+bracketAtom :: Parser SmilesModel
+bracketAtom = do
+    s <- between (char '[') (char ']') symbol
+    return $ Atom s
+
+-- Parse aliphatic
+aliphaticOrganic :: Parser SmilesModel
+aliphaticOrganic = do
+    _ <- char 'O'
+    return $ Aliphatic "O" 
 
 
 -- Parse element symbol

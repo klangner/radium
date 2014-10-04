@@ -13,4 +13,7 @@ spec =
  
     it "parse water H2O" $
         readSmiles "O" `shouldBe` Aliphatic "O" 
+ 
+    it "parse water H2O" $
+        readSmiles "O" `shouldBe` Aliphatic "O" 
         

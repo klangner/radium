@@ -1,6 +1,10 @@
 # Chemistry
 
-Radium is Haskell library with periodic table and element data.
+Radium is Haskell library for chemistry.
+It sonsists of:
+* Periodic table with element data
+* Reader for SMILES format
+
 
 ## Installation
 The library can be installed from [Hackage](http://hackage.haskell.org/package/radium) with the command:

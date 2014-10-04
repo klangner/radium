@@ -14,7 +14,10 @@ License-file:   LICENSE
 Extra-Source-Files:
                 CHANGES
 description:    
-    This library contains periodic table and basic information about elements
+    This library contains:
+    .
+    * periodic table with information about elements
+    * Reader for SMILES format
 
 source-repository head
   type:     git

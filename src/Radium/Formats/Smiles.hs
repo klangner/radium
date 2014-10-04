@@ -22,6 +22,7 @@ import Data.Set as Set
 data Smiles = Atom String
             | Aliphatic String
             | Aromatic String
+            | Unknown
             | Empty
               deriving( Eq, Show )
 
@@ -32,7 +33,7 @@ aliphatics = Set.fromList ["B", "C", "N", "O", "S", "P", "F", "Cl", "Br", "I" ]
 
 -- | Set of all aromatic symbols
 aromatics :: Set.Set Char
-aromatics = Set.fromList ['b', 'c', 'n', 'o', 's', 'p' ]
+aromatics = Set.fromList "bcnosp"
 
 -- | Parses textual representation
 readSmiles :: String -> Smiles
@@ -42,7 +43,7 @@ readSmiles xs = case parse atom "" xs of
 
 -- Parse atom
 atom :: Parser Smiles
-atom = bracketAtom <|> aliphaticOrganic <|> aromaticOrganic
+atom = bracketAtom <|> aliphaticOrganic <|> aromaticOrganic <|> unknown
 
 -- Parse atom
 bracketAtom :: Parser Smiles
@@ -62,6 +63,11 @@ aromaticOrganic = do
     ss <- lower
     if Set.member ss aromatics then return (Aromatic [ss]) else fail "" 
 
+-- Parser for '*' symbol
+unknown :: Parser Smiles
+unknown = do
+    _ <- char '*'
+    return Unknown
 
 -- Parse element symbol
 -- Starts with upper case

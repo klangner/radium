@@ -16,4 +16,10 @@ spec =
  
     it "parse water H2O" $
         readSmiles "O" `shouldBe` Aliphatic "O" 
+ 
+    it "parse aromatic" $
+        readSmiles "c" `shouldBe` Aromatic "c" 
+ 
+    it "parse '*'" $
+        readSmiles "*" `shouldBe` Unknown 
         

@@ -12,7 +12,10 @@ http://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system
 
 -}
 
-module Radium.Formats.Smiles (Smiles(..), readSmiles) where
+module Radium.Formats.Smiles ( Smiles(..)
+                             , readSmiles
+                             , writeSmiles ) where
+                             
 
 import Text.ParserCombinators.Parsec
 import Data.Set as Set
@@ -78,3 +81,11 @@ symbol = do
     ss <- many lower
     return (s:ss)
     
+    
+-- | Write SMILES to string    
+writeSmiles :: Smiles -> String
+writeSmiles (Atom xs) = "[" ++ xs ++ "]"
+writeSmiles (Aliphatic xs) = xs
+writeSmiles (Aromatic xs) = xs
+writeSmiles Unknown = "*"
+writeSmiles Empty = ""

@@ -9,17 +9,18 @@ spec =
 
   describe "Parse SMILES string" $ do 
     it "parse single atom [Au]" $
-        readSmiles "[Au]" `shouldBe` Atom "Au"
+        checkFormatters "[Au]"
  
     it "parse water H2O" $
-        readSmiles "O" `shouldBe` Aliphatic "O" 
- 
-    it "parse water H2O" $
-        readSmiles "O" `shouldBe` Aliphatic "O" 
+        checkFormatters  "O"  
  
     it "parse aromatic" $
-        readSmiles "c" `shouldBe` Aromatic "c" 
+        checkFormatters  "c" 
  
     it "parse '*'" $
-        readSmiles "*" `shouldBe` Unknown 
+        checkFormatters  "*" 
         
+        
+        
+checkFormatters :: String -> Expectation
+checkFormatters xs = writeSmiles (readSmiles xs) `shouldBe` xs

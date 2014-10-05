@@ -17,7 +17,7 @@ description:
     This library contains:
     .
     * periodic table with information about elements
-    * Reader for SMILES format
+    * Reader and writer for SMILES format
 
 source-repository head
   type:     git

@@ -12,17 +12,18 @@ http://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system
 
 -}
 
-module Radium.Formats.Smiles ( Smiles
+module Radium.Formats.Smiles ( Smiles(..)
                              , readSmiles
                              , writeSmiles ) where
                              
 
 import Text.ParserCombinators.Parsec
-import Data.Set as Set
+import qualified Data.Set as Set
+import Data.Maybe
 
 
 -- | This model describes molecules with valence bounds
-data Smiles = Atom String
+data Smiles = Atom String Int
             | Aliphatic String
             | Aromatic String
             | Unknown
@@ -51,8 +52,26 @@ atom = bracketAtom <|> aliphaticOrganic <|> aromaticOrganic <|> unknown
 -- Parse atom
 bracketAtom :: Parser Smiles
 bracketAtom = do
-    s <- between (char '[') (char ']') symbol
-    return $ Atom s
+    _ <- char '['
+    s <- symbol
+    n <- optionMaybe ionNumber
+    _ <- char ']'
+    let m = fromMaybe 0 n
+    return $ Atom s m
+
+-- Parse ion number. Ion number starts with '+' or '-'
+ionNumber :: Parser Int
+ionNumber =  do
+    s <- char '-' <|> char '+'
+    n <- number
+    let m = n+1
+    return $ if s == '-' then (-m) else m
+
+-- Parse number of elements. If number not found then return 1
+number :: Parser Int
+number =  do
+    ds <- many digit
+    return $ if null ds then 0 else read ds :: Int
 
 -- Parse aliphatic
 aliphaticOrganic :: Parser Smiles
@@ -84,7 +103,11 @@ symbol = do
     
 -- | Write SMILES to string    
 writeSmiles :: Smiles -> String
-writeSmiles (Atom xs) = "[" ++ xs ++ "]"
+writeSmiles (Atom xs n) | n < (-1) = "[" ++ xs ++ show n ++ "]"
+                        | n == (-1) = "[" ++ xs ++ "-]"
+                        | n == 1 = "[" ++ xs ++ "+]"
+                        | n > 1 = "[" ++ xs ++ "+" ++ show n ++ "]"
+                        | otherwise = "[" ++ xs ++ "]"
 writeSmiles (Aliphatic xs) = xs
 writeSmiles (Aromatic xs) = xs
 writeSmiles Unknown = "*"

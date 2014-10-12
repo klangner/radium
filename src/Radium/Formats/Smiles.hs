@@ -53,11 +53,15 @@ atom = bracketAtom <|> aliphaticOrganic <|> aromaticOrganic <|> unknown
 bracketAtom :: Parser Smiles
 bracketAtom = do
     _ <- char '['
-    s <- symbol
+    s <- symbolOrUnknown
     n <- optionMaybe ionNumber
     _ <- char ']'
     let m = fromMaybe 0 n
     return $ Atom s m
+    
+-- Accept symbol or unknown '*' character    
+symbolOrUnknown :: Parser String
+symbolOrUnknown = symbol <|> string "*"    
 
 -- Parse ion number. Ion number starts with '+' or '-'
 ionNumber :: Parser Int

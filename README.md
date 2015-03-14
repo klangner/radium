@@ -4,6 +4,7 @@ Radium is Haskell library for chemistry.
 It has the following functionality:
 * Periodic table with element data
 * Reader and writer for SMILES format
+* Reader and writer for Condensed format (Like: CH3CH2OH)
 
 
 ## Installation

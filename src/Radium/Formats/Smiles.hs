@@ -79,7 +79,7 @@ charge :: Parser Int
 charge =  do
     s <- char '-' <|> char '+'
     n <- number
-    let m = n+1
+    let m = if n == 0 then 1 else n
     return $ if s == '-' then (-m) else m
 
 -- Parse number of elements. If number not found then return 1
@@ -118,13 +118,16 @@ symbol = do
     
 -- | Write SMILES to string    
 writeSmiles :: Smiles -> String
-writeSmiles (Atom xs hc n) | n < (-1) = "[" ++ xs ++ show n ++ "]"
-                           | n == (-1) = "[" ++ xs ++ "-]"
-                           | n == 1 = "[" ++ xs ++ "+]"
-                           | n > 1 = "[" ++ xs ++ "+" ++ show n ++ "]"
+writeSmiles (Atom xs hc n) | n < (-1) = "[" ++ xs ++ showHyrdogen ++ show n ++ "]"
+                           | n == (-1) = "[" ++ xs ++ showHyrdogen ++ "-]"
+                           | n == 1 = "[" ++ xs ++ showHyrdogen ++ "+]"
+                           | n > 1 = "[" ++ xs ++ showHyrdogen ++ "+" ++ show n ++ "]"
                            | hc > 1 = "[" ++ xs ++ "H" ++ show hc ++ "]"
                            | hc > 0 = "[" ++ xs ++ "H]"
                            | otherwise = "[" ++ xs ++ "]"
+                           where showHyrdogen | hc > 1 = "H" ++ show hc
+                                              | hc == 1 = "H"
+                                              | otherwise = ""
 writeSmiles (Aliphatic xs) = xs
 writeSmiles (Aromatic xs) = xs
 writeSmiles Unknown = "*"

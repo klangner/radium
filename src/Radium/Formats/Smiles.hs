@@ -23,6 +23,7 @@ import Data.Maybe
 
 -- | This model describes molecules with valence bounds
 data Smiles = Atom  String      -- Symbol
+                    Int         -- Isotopes count
                     Int         -- Hydrogen count
                     Int         -- Ion number (charge)
             | Aliphatic String
@@ -54,13 +55,12 @@ atom = bracketAtom <|> aliphaticOrganic <|> aromaticOrganic <|> unknown
 bracketAtom :: Parser Smiles
 bracketAtom = do
     _ <- char '['
+    i <- optionMaybe number
     s <- symbolOrUnknown
     hc <- optionMaybe hcount
     n <- optionMaybe charge
     _ <- char ']'
-    let c = fromMaybe 0 hc
-    let m = fromMaybe 0 n
-    return $ Atom s c m
+    return $ Atom s (fromMaybe 0 i) (fromMaybe 0 hc) (fromMaybe 0 n)
     
 -- Accept symbol or unknown '*' character    
 symbolOrUnknown :: Parser String
@@ -118,16 +118,18 @@ symbol = do
     
 -- | Write SMILES to string    
 writeSmiles :: Smiles -> String
-writeSmiles (Atom xs hc n) | n < (-1) = "[" ++ xs ++ showHyrdogen ++ show n ++ "]"
-                           | n == (-1) = "[" ++ xs ++ showHyrdogen ++ "-]"
-                           | n == 1 = "[" ++ xs ++ showHyrdogen ++ "+]"
-                           | n > 1 = "[" ++ xs ++ showHyrdogen ++ "+" ++ show n ++ "]"
-                           | hc > 1 = "[" ++ xs ++ "H" ++ show hc ++ "]"
-                           | hc > 0 = "[" ++ xs ++ "H]"
-                           | otherwise = "[" ++ xs ++ "]"
-                           where showHyrdogen | hc > 1 = "H" ++ show hc
-                                              | hc == 1 = "H"
-                                              | otherwise = ""
+writeSmiles (Atom xs ic hc n) = "[" ++ showIsotopes ++ xs ++ showHyrdogen ++ showCharge ++ "]"
+    where showIsotopes = if ic > 0 then show ic else ""
+          showHyrdogen | hc > 1 = "H" ++ show hc
+                       | hc == 1 = "H"
+                       | otherwise = ""
+          showCharge | n < (-1) = show n
+                     | n == (-1) = "-"
+                     | n == 1 = "+"
+                     | n > 1 = "+" ++ show n
+                     | otherwise = ""
+
+
 writeSmiles (Aliphatic xs) = xs
 writeSmiles (Aromatic xs) = xs
 writeSmiles Unknown = "*"

@@ -48,12 +48,12 @@ spec = do
     it "parse [Cu+2]" $
         checkFormatters  "[Cu+2]"
 
---  describe "Parse isotopes" $ do
---    it "parse [13CH4]" $
---        checkFormatters "[13CH4]"
---
---    it "parse [238U]" $
---        checkFormatters "[238U]"
+  describe "Parse isotopes" $ do
+    it "parse [13CH4]" $
+        checkFormatters "[13CH4]"
+
+    it "parse [238U]" $
+        checkFormatters "[238U]"
 
 
 checkFormatters :: String -> Expectation

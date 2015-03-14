@@ -26,6 +26,12 @@ spec =
     it "parse [*]" $
         checkFormatters  "[*]" 
         
+    it "parse hydrogens [CH]" $
+        checkFormatters  "[CH]" 
+        
+    it "parse hydrogens [CH4]" $
+        checkFormatters  "[CH4]"
+        
 
 checkFormatters :: String -> Expectation
 checkFormatters xs = writeSmiles (readSmiles xs) `shouldBe` xs

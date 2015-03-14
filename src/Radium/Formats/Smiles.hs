@@ -12,8 +12,7 @@ http://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system
 
 -}
 
-module Radium.Formats.Smiles ( Smiles(..)
-                             , readSmiles
+module Radium.Formats.Smiles ( readSmiles
                              , writeSmiles ) where
                              
 
@@ -23,7 +22,9 @@ import Data.Maybe
 
 
 -- | This model describes molecules with valence bounds
-data Smiles = Atom String Int
+data Smiles = Atom  String      -- Symbol
+                    Int         -- Hydrogen count
+                    Int         -- Ion number (charge)
             | Aliphatic String
             | Aromatic String
             | Unknown
@@ -54,18 +55,28 @@ bracketAtom :: Parser Smiles
 bracketAtom = do
     _ <- char '['
     s <- symbolOrUnknown
-    n <- optionMaybe ionNumber
+    hc <- optionMaybe hcount
+    n <- optionMaybe charge
     _ <- char ']'
+    let c = fromMaybe 0 hc
     let m = fromMaybe 0 n
-    return $ Atom s m
+    return $ Atom s c m
     
 -- Accept symbol or unknown '*' character    
 symbolOrUnknown :: Parser String
 symbolOrUnknown = symbol <|> string "*"    
 
--- Parse ion number. Ion number starts with '+' or '-'
-ionNumber :: Parser Int
-ionNumber =  do
+-- Parse hydrogen
+hcount :: Parser Int
+hcount =  do
+    _ <- char 'H'
+    hc <- optionMaybe number
+    let n = fromMaybe 1 hc
+    return $ if n == 0 then 1 else n
+
+-- Parse ion number (charge). Ion number starts with '+' or '-'
+charge :: Parser Int
+charge =  do
     s <- char '-' <|> char '+'
     n <- number
     let m = n+1
@@ -107,11 +118,13 @@ symbol = do
     
 -- | Write SMILES to string    
 writeSmiles :: Smiles -> String
-writeSmiles (Atom xs n) | n < (-1) = "[" ++ xs ++ show n ++ "]"
-                        | n == (-1) = "[" ++ xs ++ "-]"
-                        | n == 1 = "[" ++ xs ++ "+]"
-                        | n > 1 = "[" ++ xs ++ "+" ++ show n ++ "]"
-                        | otherwise = "[" ++ xs ++ "]"
+writeSmiles (Atom xs hc n) | n < (-1) = "[" ++ xs ++ show n ++ "]"
+                           | n == (-1) = "[" ++ xs ++ "-]"
+                           | n == 1 = "[" ++ xs ++ "+]"
+                           | n > 1 = "[" ++ xs ++ "+" ++ show n ++ "]"
+                           | hc > 1 = "[" ++ xs ++ "H" ++ show hc ++ "]"
+                           | hc > 0 = "[" ++ xs ++ "H]"
+                           | otherwise = "[" ++ xs ++ "]"
 writeSmiles (Aliphatic xs) = xs
 writeSmiles (Aromatic xs) = xs
 writeSmiles Unknown = "*"

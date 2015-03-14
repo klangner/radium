@@ -1,5 +1,5 @@
 name:           radium
-version:        0.4
+version:        0.5
 cabal-version:  >= 1.10
 build-type:     Simple
 author:         Krzysztof Langner
@@ -17,7 +17,8 @@ description:
     This library contains:
     .
     * periodic table with information about elements
-    * Reader and writer for SMILES format
+    .
+    * Readers and writers for different formula formats.
 
 source-repository head
   type:     git

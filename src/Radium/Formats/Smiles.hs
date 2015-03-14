@@ -26,6 +26,7 @@ data Smiles = Atom  String      -- Symbol
                     Int         -- Isotopes count
                     Int         -- Hydrogen count
                     Int         -- Ion number (charge)
+                    Int         -- Atom class
             | Aliphatic String
             | Aromatic String
             | Unknown
@@ -59,8 +60,9 @@ bracketAtom = do
     s <- symbolOrUnknown
     hc <- optionMaybe hcount
     n <- optionMaybe charge
+    ac <- optionMaybe atomClass
     _ <- char ']'
-    return $ Atom s (fromMaybe 0 i) (fromMaybe 0 hc) (fromMaybe 0 n)
+    return $ Atom s (fromMaybe 0 i) (fromMaybe 0 hc) (fromMaybe 0 n) (fromMaybe 0 ac)
     
 -- Accept symbol or unknown '*' character    
 symbolOrUnknown :: Parser String
@@ -81,6 +83,12 @@ charge =  do
     n <- number
     let m = if n == 0 then 1 else n
     return $ if s == '-' then (-m) else m
+
+-- Parse atom class
+atomClass :: Parser Int
+atomClass =  do
+    _ <- char ':'
+    number
 
 -- Parse number of elements. If number not found then return 1
 number :: Parser Int
@@ -118,7 +126,7 @@ symbol = do
     
 -- | Write SMILES to string    
 writeSmiles :: Smiles -> String
-writeSmiles (Atom xs ic hc n) = "[" ++ showIsotopes ++ xs ++ showHyrdogen ++ showCharge ++ "]"
+writeSmiles (Atom xs ic hc n ac) = "[" ++ showIsotopes ++ xs ++ showHyrdogen ++ showCharge ++ showClass ++ "]"
     where showIsotopes = if ic > 0 then show ic else ""
           showHyrdogen | hc > 1 = "H" ++ show hc
                        | hc == 1 = "H"
@@ -128,7 +136,7 @@ writeSmiles (Atom xs ic hc n) = "[" ++ showIsotopes ++ xs ++ showHyrdogen ++ sho
                      | n == 1 = "+"
                      | n > 1 = "+" ++ show n
                      | otherwise = ""
-
+          showClass = if ac > 0 then ":" ++ show ac else ""
 
 writeSmiles (Aliphatic xs) = xs
 writeSmiles (Aromatic xs) = xs

@@ -1,3 +1,6 @@
+Version 0.4
+* Added parser and writer for SMILES format
+
 Version 0.3
 * Added electronegativity and ionization energy for all elements
 

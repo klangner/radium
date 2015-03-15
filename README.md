@@ -5,8 +5,9 @@
 Radium is Haskell library for chemistry.
 It has the following functionality:
 * Periodic table with element data.
-* Reader and writer for SMILES format ([examples](https://github.com/klangner/radium/blob/master/test-src/Radium/Formats/SmilesSpec.hs)).
-* Reader and writer for Condensed format ([examples](https://github.com/klangner/radium/blob/master/test-src/Radium/Formats/CondensedSpec.hs)).
+* Readers and writers for the following formats:
+  * SMILES ([examples](https://github.com/klangner/radium/blob/master/test-src/Radium/Formats/SmilesSpec.hs)).
+  * Condensed ([examples](https://github.com/klangner/radium/blob/master/test-src/Radium/Formats/CondensedSpec.hs)).
 
 
 ## Installation

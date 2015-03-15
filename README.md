@@ -1,4 +1,6 @@
-# Chemistry
+[![Build Status](https://travis-ci.org/klangner/radium.svg?branch=master)](https://travis-ci.org/klangner/radium)
+
+# Introduction
 
 Radium is Haskell library for chemistry.
 It has the following functionality:

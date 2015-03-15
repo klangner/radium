@@ -12,7 +12,8 @@ http://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system
 
 -}
 
-module Radium.Formats.Smiles ( readSmiles
+module Radium.Formats.Smiles ( Smiles(..)
+                             , readSmiles
                              , writeSmiles ) where
                              
 

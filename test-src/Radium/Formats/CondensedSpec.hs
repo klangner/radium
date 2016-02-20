@@ -20,9 +20,9 @@ spec =
         readCondensed "He3O2" `shouldBe` Molecule [Element "He" 3, Element "O" 2] 1
         checkFormatters  "He3O2"
 
---    it "parse formula with groups" $ do
---        readCondensed "(CH3)2CO" `shouldBe` Molecule [ Molecule [Element "C" 1, Element "H" 3] 2, Element "C" 1, Element "O" 1] 1
---        checkFormatters  "(CH3)2CO"
+    it "parse formula with groups" $ do
+        readCondensed "(CH3)2CO" `shouldBe` Molecule [ Molecule [Element "C" 1, Element "H" 3] 2, Element "C" 1, Element "O" 1] 1
+        checkFormatters  "(CH3)2CO"
 
     it "parse formula with ions +2" $ do
         readCondensed "SO4+2" `shouldBe` Ion (Molecule [Element "S" 1, Element "O" 4] 1) 2

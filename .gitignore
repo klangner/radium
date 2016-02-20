@@ -1,7 +1,5 @@
-/radium.iml
-/.idea/
-/.dist-buildwrapper/
-/.settings/
-/dist/
-/temp/
-/.stack-work/
+radium.iml
+.idea
+.dist-buildwrapper
+dist
+.stack-work

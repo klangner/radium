@@ -41,6 +41,7 @@ readCondensed xs = case parse ion "" xs of
     Right val -> val
 
 -- Parse ion
+-- E.g H-
 ion :: Parser SymbolMolecule
 ion = do 
     c <- number
@@ -54,7 +55,8 @@ ion = do
 formula :: Parser [SymbolMolecule]
 formula = many (subformula <|> element)
 
--- Parse subformula in brackets '(' ')'
+-- Parse subformula in brackets '(' ')'.
+-- E.g. (CH3)2CO
 subformula :: Parser SymbolMolecule
 subformula = do
     s <- between (char '(') (char ')') formula
@@ -96,8 +98,13 @@ ionNumber =  do
 -- | Write Molecule to string
 writeCondensed :: SymbolMolecule -> String
 writeCondensed (Ion x n) = writeCondensed x ++ writeIon n
-writeCondensed (Molecule xs n) =  writeNumber n ++ concatMap writeCondensed xs
+writeCondensed (Molecule xs n) =  writeNumber n ++ concatMap writeCondensed2 xs
 writeCondensed (Element x n) = x ++ writeNumber n
+
+-- | Write Molecule to string
+writeCondensed2 :: SymbolMolecule -> String
+writeCondensed2 (Molecule xs n) =  "(" ++ concatMap writeCondensed2 xs ++ ")" ++ writeNumber n
+writeCondensed2 m = writeCondensed m
 
 -- | Write ion number in format expected by formula
 writeIon :: Int -> String

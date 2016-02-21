@@ -1,3 +1,6 @@
+Version 0.5
+* Added parser for groups in Condensed format
+
 Version 0.4
 * Added parser and writer for SMILES format
 * Merged project radium-formula-parser. Added Condensed formula parser

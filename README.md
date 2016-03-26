@@ -2,9 +2,9 @@
 
 # Introduction
 
-Radium is Haskell library for chemistry.
+Radium is Haskell library for the Chemistry.
 It has the following functionality:
-* Periodic table with element data.
+* Periodic table with the element data.
 * Readers and writers for the following formats:
   * SMILES ([examples](https://github.com/klangner/radium/blob/master/test-src/Radium/Formats/SmilesSpec.hs)).
   * Condensed ([examples](https://github.com/klangner/radium/blob/master/test-src/Radium/Formats/CondensedSpec.hs)).

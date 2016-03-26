@@ -1,3 +1,6 @@
+Version 0.6
+* Added parser for bounds in SMILES format
+
 Version 0.5
 * Added parser for groups in Condensed format
 

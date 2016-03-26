@@ -54,6 +54,60 @@ spec = do
     it "parse [Cu+2]" $
         checkFormatters  "[Cu+2]"
 
+    it "parse [Cu++]" $
+        checkFormatters  "[Cu+2]"
+
+    it "parse max negative charge" $
+        checkFormatters  "[Cu-15]"
+
+    it "parse max charge" $
+        checkFormatters  "[Cu+15]"
+
+
+  describe "Parse Isotopes" $ do
+    it "parse [13CH4]" $
+        checkFormatters  "[13CH4]"
+
+    it "parse [2H+]" $
+        checkFormatters  "[2H+]"
+
+    it "parse [238U]" $
+        checkFormatters  "[238U]"
+
+
+  describe "Parse Organic subset" $ do
+    it "parse C" $
+        checkFormatters  "C"
+
+    it "parse N" $
+        checkFormatters  "N"
+
+    it "parse Cl" $
+        checkFormatters  "Cl"
+
+
+  describe "Parse Bonds" $ do
+    it "parse Ethane" $
+        checkFormatters  "CC"
+
+    it "parse Ethanol" $
+        checkFormatters  "CCO"
+
+    it "parse n-butylamine" $
+        checkFormatters  "NCCCC"
+
+    it "parse Ethane C=C" $
+        checkFormatters  "C=C"
+
+    it "parse hydrogen cyanide" $
+        checkFormatters  "C#N"
+
+    it "parse 2-butyne" $
+        checkFormatters  "CC#CC"
+
+    it "parse propanol" $
+        checkFormatters  "CCC=O"
+
 
 checkFormatters :: String -> Expectation
-checkFormatters xs = writeSmiles (readSmiles xs) `shouldBe` xs
+checkFormatters xs = fmap writeSmiles (readSmiles xs) `shouldBe` (Right xs)

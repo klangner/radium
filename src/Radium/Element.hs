@@ -12,6 +12,7 @@ This module contains Periodic Table with information about all known elements.
 
 module Radium.Element ( Element
                       , atomicNumber
+                      , symbol
                       , atomWeight
                       , electroNegativity
                       , ionizationEnergy

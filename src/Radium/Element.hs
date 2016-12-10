@@ -12,6 +12,7 @@ This module contains Periodic Table with information about all known elements.
 
 module Radium.Element ( Element
                       , atomicNumber
+                      , symbol
                       , atomWeight
                       , electroNegativity
                       , ionizationEnergy
@@ -147,12 +148,12 @@ ptable = [ Element 1 "H" "Hydrogen"         1.008       2.2     1.312
          , Element 110 "Ds" "Darmstadtium"  269         0       0
          , Element 111 "Rg" "Roentgenium"   272         0       0
          , Element 112 "Cn" "Copernicium"   285         0       0
-         , Element 113 "Uut" "Ununtrium"    284         0       0
-         , Element 114 "Uug" "Ununquadium"  289         0       0
-         , Element 115 "Uup" "Ununpentium"  288         0       0
-         , Element 116 "Uuh" "Ununhexium"   293         0       0
-         , Element 117 "Uus" "Ununseptium"  294         0       0
-         , Element 118 "Uuo" "Ununoctium"   294         0       0
+         , Element 113 "Nh" "Nihonium"      284         0       0
+         , Element 114 "Fl" "Flerovium"     289         0       0
+         , Element 115 "Mc" "Moscovium"     288         0       0
+         , Element 116 "Lv" "Livermorium"   293         0       0
+         , Element 117 "Ts" "Tennessine"    294         0       0
+         , Element 118 "Og" "Oganesson"     294         0       0
          ]
            
 

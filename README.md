@@ -12,7 +12,7 @@ It has the following functionality:
 
 
 ## Installation
-The library can be installed from [Hackage](http://hackage.haskell.org/package/radium) with the command:
+The library can be installed from [Hackage](http://hackage.haskell.org/package/radium) or build from source:
 
 ```sh
 stack setup

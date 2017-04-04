@@ -14,7 +14,9 @@ It has the following functionality:
 The library can be installed from [Hackage](http://hackage.haskell.org/package/radium) with the command:
 
 ```sh
-cabal install radium
+stack setup
+stack build
+stack test
 ```
 
 ## Redistributing

@@ -27,6 +27,7 @@ data Smiles = SmilesRing Atom       -- Atom symbol
                          Int        -- Number of bounds
                          Smiles     -- Rest of smiles
             | Smiles Atom
+            deriving( Eq, Show )
 
 data Atom = Atom  String      -- Symbol
                   Int         -- Isotopes count

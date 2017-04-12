@@ -239,7 +239,7 @@ covalentBounds e = min n (8-n)
   where n = valanceElectrons e
 
 
--- Get list of all possible coordination numbers (valences)
+-- | Get list of all possible coordination numbers (valences)
 possibleValences :: Element -> [Int]
 possibleValences el = fmap helper . possibleElectronConfigs $ atomicNumber el
   where
@@ -285,7 +285,7 @@ excite conf = fmap removeEmptyShells excConf
                           else
                             Nothing
 
--- Generate all possible electron configs (unexcited and excited) with given number of electrons
+-- | Generate all possible electron configs (unexcited and excited) with given number of electrons
 possibleElectronConfigs :: Int -> [[(Int, Int, Int)]]
 possibleElectronConfigs e = fillShells e : unfoldr helper (fillShells e)
   where
@@ -310,7 +310,7 @@ appendEmptyShells conf = conf ++ addSublayers
     addSublayers = fmap (\x -> (maxLayer, x, 0)) [(maxSublayer + 1) .. maxLayer]
 
 
--- Do the oppsoite of the function above
+-- Do the opposite of the function above
 removeEmptyShells :: [(Int, Int, Int)] -> [(Int, Int, Int)]
 removeEmptyShells = filter ((/= 0) . (^._3))
 

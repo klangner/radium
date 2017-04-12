@@ -32,9 +32,13 @@ import           Data.List     (findIndex, findIndices, unfoldr)
 import qualified Data.Map      as Map
 import           Data.Maybe    (listToMaybe)
 import           Data.Sequence (fromList, update)
-import           Debug.Trace   (trace)
 
 
+-- | Orbitals have names: s, p, d, e ,f, g, h
+--   But here are modeled as Int starting from s = 1
+type OrbitalId = Int
+
+-- | Element from periodic table configuration
 data Element = Element { atomicNumber      :: Int
                        , symbol            :: String
                        , _name             :: String
@@ -43,6 +47,11 @@ data Element = Element { atomicNumber      :: Int
                        , ionizationEnergy  :: Double
                        }
              | Unknown deriving (Eq, Show)
+
+-- | Orbital configuration
+data OrbitalState = State Int         -- Energy level
+                          OrbitalId   -- Orbital id
+                          Int         -- Number of electrons
 
 -- Periodic Table
 ptable :: [Element]
@@ -253,6 +262,11 @@ possibleValences el = fmap helper . possibleElectronConfigs $ atomicNumber el
 subshellMaxElectrons :: [Int]
 subshellMaxElectrons = fmap (*2) subshellOrbitals
 
+-- s sub-shell consists of only 1 orbital.
+-- p sub-shell consists of 3 orbitals.
+-- d sub-shell consists of 5 orbitals.
+-- f sub-shell consists of 7 orbitals.
+-- g sub-shell consists of 9 orbitals.
 subshellOrbitals :: [Int]
 subshellOrbitals = [1, 3, 5, 7, 9]
 
@@ -293,10 +307,11 @@ possibleElectronConfigs e = fillShells e : unfoldr helper (fillShells e)
       res <- excite x
       return (res, res)
 
--- Generate possible config for given maximum number of shells.
+-- Generate possible config for a given subshell id.
 -- The order is based on Aufbau principle.
 -- http://en.wikipedia.org/wiki/Aufbau_principle
-shellConfigGen :: Int -> [(Int, Int)]
+-- Return ordered list of shell number with subshell id.
+shellConfigGen :: OrbitalId -> [(Int, OrbitalId)]
 shellConfigGen n = [(i,m-i) | m <- [2..n+n], i <- [((m+1) `div` 2)..m-1] ]
 
 
@@ -315,13 +330,14 @@ removeEmptyShells :: [(Int, Int, Int)] -> [(Int, Int, Int)]
 removeEmptyShells = filter ((/= 0) . (^._3))
 
 
--- Fill shells with given number of electrons
-fillShells :: Int -> [( Int  -- Shell number
-                      , Int  -- Shell type
-                      , Int  -- #Electrons
+-- Fill shells up to given number of electrons.
+-- This function only fills subshells up to 'g' (id=5)
+fillShells :: Int -> [( Int         -- Shell number
+                      , OrbitalId  -- Shell type
+                      , Int         -- #Electrons
                         )]
 fillShells = f (shellConfigGen 5)
-        where f :: [(Int, Int)] -> Int -> [(Int, Int, Int)]
+        where f :: [(Int, OrbitalId)] -> Int -> [(Int, OrbitalId, Int)]
               f [] _ = []
               f ((i,j):xs) m | m == 0 = []
                              | m < l = [(i, j, m)]

@@ -181,10 +181,12 @@ ptable = [ Element 1 "H" "Hydrogen"         1.008       2.2     1.312
 -- > atomicNumber (element 8) == 8
 element :: Int -> Element
 element n = f n ptable
-    where f :: Int -> [Element] -> Element
-          f _ [] = Unknown
-          f x (e:es) | atomicNumber e == x = e
-                     | otherwise = f x es
+    where
+        f :: Int -> [Element] -> Element
+        f _ [] = Unknown
+        f x (e:es) | atomicNumber e == x = e
+                   | otherwise = f x es
+
 
 -- | Find element by its symbol
 --
@@ -245,7 +247,8 @@ valanceElectrons e = last (electronConfig e)
 -- > covalentBounds e == 2
 covalentBounds :: Element -> Int
 covalentBounds e = min n (8-n)
-  where n = valanceElectrons e
+  where
+    n = valanceElectrons e
 
 
 -- | Get list of all possible coordination numbers (valences)
@@ -337,9 +340,11 @@ fillShells :: Int -> [( Int         -- Shell number
                       , Int         -- #Electrons
                         )]
 fillShells = f (shellConfigGen 5)
-        where f :: [(Int, OrbitalId)] -> Int -> [(Int, OrbitalId, Int)]
-              f [] _ = []
-              f ((i,j):xs) m | m == 0 = []
-                             | m < l = [(i, j, m)]
-                             | otherwise = (i, j, l) : f xs (m - l)
-                             where l = subshellMaxElectrons !! (j-1)
+    where
+        f :: [(Int, OrbitalId)] -> Int -> [(Int, OrbitalId, Int)]
+        f [] _ = []
+        f ((i,j):xs) m | m == 0 = []
+                       | m < l = [(i, j, m)]
+                       | otherwise = (i, j, l) : f xs (m - l)
+            where
+                l = subshellMaxElectrons !! (j-1)

@@ -10,24 +10,19 @@ Portability : portable
 This module contains Periodic Table with information about all known elements.
 -}
 
-module Radium.Element ( Element
+module Radium.Element ( Element(..)
                       , Ion (..)
                       , OrbitalId (..)
                       , OrbitalState (..)
-                      , atomicNumber
-                      , atomWeight
                       , covalentBounds
                       , electronConfig
-                      , electroNegativity
                       , element
                       , elementBySymbol
                       , ionElectronConfig
-                      , ionizationEnergy
                       , possibleElectronConfigs
                       , possibleIonElectronConfigs
                       , possibleIonValences
                       , possibleValences
-                      , symbol
                       , valenceElectrons
                       ) where
 

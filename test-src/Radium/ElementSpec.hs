@@ -37,28 +37,28 @@ spec = do
 
   describe "Count shell electrons in different states" $ do
     it "Possible carbon electron states"
-      (possibleElectronConfigs 6 `shouldBe` [[(1, 1, 2), (2, 1, 2), (2, 2, 2)], [(1, 1, 2), (2, 1, 1), (2, 2, 3)]])
+      (possibleElectronConfigs 6 `shouldBe` [[State 1 S 2, State 2 S 2, State 2 P 2], [State 1 S 2, State 2 S 1, State 2 P 3]])
 
     it "Possible hydrogen electron states"
-      (possibleElectronConfigs 1 `shouldBe` [[(1, 1, 1)]])
+      (possibleElectronConfigs 1 `shouldBe` [[State 1 S 1]])
 
     it "Possible boron electron states"
-      (possibleElectronConfigs 5 `shouldBe` [[(1, 1, 2), (2, 1, 2), (2, 2, 1)], [(1, 1, 2), (2, 1, 1), (2, 2, 2)]])
+      (possibleElectronConfigs 5 `shouldBe` [[State 1 S 2, State 2 S 2, State 2 P 1], [State 1 S 2, State 2 S 1, State 2 P 2]])
 
     it "Possible nitrogen electron states"
-      (possibleElectronConfigs 7 `shouldBe` [[(1, 1, 2), (2, 1, 2), (2, 2, 3)]])
+      (possibleElectronConfigs 7 `shouldBe` [[State 1 S 2, State 2 S 2, State 2 P 3]])
 
     it "Possible oxygen electron states"
-      (possibleElectronConfigs 8 `shouldBe` [[(1, 1, 2), (2, 1, 2), (2, 2, 4)]])
+      (possibleElectronConfigs 8 `shouldBe` [[State 1 S 2, State 2 S 2, State 2 P 4]])
 
     it "Possible sulfur electron states"
-      (possibleElectronConfigs 16 `shouldBe` [[(1, 1, 2), (2, 1, 2), (2, 2, 6), (3, 1, 2), (3, 2, 4)],
-                                              [(1, 1, 2), (2, 1, 2), (2, 2, 6), (3, 1, 2), (3, 2, 3), (3, 3, 1)],
-                                              [(1, 1, 2), (2, 1, 2), (2, 2, 6), (3, 1, 1), (3, 2, 3), (3, 3, 2)]])
+      (possibleElectronConfigs 16 `shouldBe` [[State 1 S 2, State 2 S 2, State 2 P 6, State 3 S 2, State 3 P 4],
+                                              [State 1 S 2, State 2 S 2, State 2 P 6, State 3 S 2, State 3 P 3, State 3 D 1],
+                                              [State 1 S 2, State 2 S 2, State 2 P 6, State 3 S 1, State 3 P 3, State 3 D 2]])
 
     it "Possible phosphorus electron states"
-      (possibleElectronConfigs 15 `shouldBe` [[(1, 1, 2), (2, 1, 2), (2, 2, 6), (3, 1, 2), (3, 2, 3)],
-                                               [(1, 1, 2), (2, 1, 2), (2, 2, 6), (3, 1, 1), (3, 2, 3), (3, 3, 1)]])
+      (possibleElectronConfigs 15 `shouldBe` [[State 1 S 2, State 2  S 2, State 2 P 6, State 3 S 2, State 3 P 3],
+                                              [State 1 S 2, State 2  S 2, State 2 P 6, State 3 S 1, State 3 P 3, State 3 D 1]])
 
   describe "Test atom valences" $ do
     it "Possible valences for boron"
@@ -72,7 +72,7 @@ spec = do
 
     it "Possible valences for fluorine"
       (possibleValences (element 9) `shouldBe` [1])
-      
+
     it "Possible valences for neon"
       (possibleValences (element 10) `shouldBe` [0])
 

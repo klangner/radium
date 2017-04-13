@@ -11,6 +11,9 @@ This module contains Periodic Table with information about all known elements.
 -}
 
 module Radium.Element ( Element
+                      , Ion (..)
+                      , OrbitalId (..)
+                      , OrbitalState (..)
                       , atomicNumber
                       , atomWeight
                       , covalentBounds
@@ -18,15 +21,17 @@ module Radium.Element ( Element
                       , electroNegativity
                       , element
                       , elementBySymbol
+                      , ionElectronConfig
                       , ionizationEnergy
                       , possibleElectronConfigs
+                      , possibleIonElectronConfigs
+                      , possibleIonValences
                       , possibleValences
                       , symbol
-                      , valanceElectrons
+                      , valenceElectrons
                       ) where
 
 import           Control.Arrow ((&&&))
-import           Control.Lens  (Field1 (..), Field2 (..), Field3 (..), (^.))
 import           Data.Foldable (toList)
 import           Data.List     (findIndex, findIndices, unfoldr)
 import qualified Data.Map      as Map
@@ -34,9 +39,10 @@ import           Data.Maybe    (listToMaybe)
 import           Data.Sequence (fromList, update)
 
 
--- | Orbitals have names: s, p, d, e ,f, g, h
---   But here are modeled as Int starting from s = 1
-type OrbitalId = Int
+-- | Orbitals have names: s, p, d ,f, g, h
+data OrbitalId = S | P | D | F | G | H
+  deriving (Show, Eq, Enum, Ord)
+
 
 -- | Element from periodic table configuration
 data Element = Element { atomicNumber      :: Int
@@ -46,12 +52,31 @@ data Element = Element { atomicNumber      :: Int
                        , electroNegativity :: Double
                        , ionizationEnergy  :: Double
                        }
-             | Unknown deriving (Eq, Show)
+             | Unknown deriving (Eq)
+instance Show Element where
+  show Unknown              = "*"
+  show Element { symbol=s } = s
+
+
+-- | Atom with non-ground atom shell
+data Ion = Ion {
+  ionElement :: Element,
+  ionCharge  :: Int
+}
+instance Show Ion where
+  show (Ion e n) | n ==  0 = show e
+                 | n ==  1 = show e ++ "+"
+                 | n >   1 = show e ++ "+" ++ show n
+                 | n == -1 = show e ++ "-"
+                 | n <  -1 = show e ++ "-" ++ show n
+  show _ = "Unknown ion"
 
 -- | Orbital configuration
-data OrbitalState = State Int         -- Energy level
-                          OrbitalId   -- Orbital id
-                          Int         -- Number of electrons
+data OrbitalState = State {
+  orbitalLayer     :: Int,
+  orbitalSublayer  :: OrbitalId,
+  orbitalElectrons :: Int
+} deriving (Show, Eq)
 
 -- Periodic Table
 ptable :: [Element]
@@ -181,11 +206,10 @@ ptable = [ Element 1 "H" "Hydrogen"         1.008       2.2     1.312
 -- > atomicNumber (element 8) == 8
 element :: Int -> Element
 element n = f n ptable
-    where
-        f :: Int -> [Element] -> Element
-        f _ [] = Unknown
-        f x (e:es) | atomicNumber e == x = e
-                   | otherwise = f x es
+    where f :: Int -> [Element] -> Element
+          f _ [] = Unknown
+          f x (e:es) | atomicNumber e == x = e
+                     | otherwise = f x es
 
 
 -- | Find element by its symbol
@@ -224,46 +248,67 @@ configExceptions = Map.fromList [ (24, [2, 8, 13, 1])
 --   Is it possible to calculate it for all elements based only on atom properties?
 --
 -- > let e = element 8
--- > shellElectrons e == [2, 6]
+-- > electronConfig e == [2, 6]
 electronConfig :: Element -> [Int]
 electronConfig e = case Map.lookup (atomicNumber e) configExceptions of
                     Just val -> val
                     _ -> filter (> 0) $ f (fillShells (atomicNumber e))
-                        where f :: [(Int, Int, Int)] -> [Int]
+                        where f :: [OrbitalState] -> [Int]
                               f ss = [sum (g n ss) | n <- [1..m]]
                                 where m = length ss
-                                      g l = map (\(a,_,c) -> if a == l then c else 0)
+                                      g l = map (\(State a _ c) -> if a == l then c else 0)
+
+
+-- | Show number of electrons in each shell for an ionized state of an atom
+--
+-- > let i = Ion (element 20) 2
+-- > ionElectronConfig i == [2, 8, 8]
+-- > let i = Ion (element 17) (-1)
+-- > ionElectronConfig i == [2, 8, 8]
+ionElectronConfig :: Ion -> [Int]
+ionElectronConfig (Ion e c) | c > 0 = prt . helperP c    $ electronConfig e
+                            | c < 0 = prt . helperN (-c) $ electronConfig e
+                            | otherwise = electronConfig e
+  where
+    prt [] = []
+    prt l  = if last l == 0 then prt $ init l else l
+
+    helperP ch conf | ch == 0 = conf
+                    | last conf > 0 = helperP (ch - 1) (init conf ++ [last conf - 1])
+                    | otherwise = helperP ch $ init conf
+    helperN ch conf | ch == 0 = conf
+                    | last conf < (layerOrbitals !! (length conf - 1) * 2) = helperN (ch - 1) (init conf ++ [last conf + 1])
+                    | otherwise = helperN ch $ conf ++ [0]
 
 -- | Number of valance electrons
 --
 -- > let e = element 8
--- > valanceElectrons e == 6
-valanceElectrons :: Element -> Int
-valanceElectrons e = last (electronConfig e)
+-- > valenceElectrons e == 6
+valenceElectrons :: Element -> Int
+valenceElectrons e = last (electronConfig e)
 
 -- | Number of covalent bounds in element
 --
 -- > let e = element 8
 -- > covalentBounds e == 2
 covalentBounds :: Element -> Int
-covalentBounds e = min n (8-n)
-  where
-    n = valanceElectrons e
+covalentBounds e = min n (8 - n)
+  where n = valenceElectrons e
 
 
 -- | Get list of all possible coordination numbers (valences)
 possibleValences :: Element -> [Int]
-possibleValences el = fmap helper . possibleElectronConfigs $ atomicNumber el
-  where
-    helper = foldr val 0
-    valSub s e = if e < size then e else size * 2 - e
-      where size = subshellOrbitals !! (s - 1)
-    val (_, s, e) b = b + valSub s e
+possibleValences el = valenceHelper <$> possibleElectronConfigs el
 
+-- | Get list of all possible valences for an ion
+possibleIonValences :: Ion -> [Int]
+possibleIonValences i = valenceHelper <$> possibleIonElectronConfigs i
 
--- How many electrons are in each subshell
-subshellMaxElectrons :: [Int]
-subshellMaxElectrons = fmap (*2) subshellOrbitals
+valenceHelper :: [OrbitalState] -> Int
+valenceHelper = foldr val 0
+  where valSub s e = if e < subshellOrbital s then e else subshellOrbital s * 2 - e
+        val (State _ s e) b = b + valSub s e
+
 
 -- s sub-shell consists of only 1 orbital.
 -- p sub-shell consists of 3 orbitals.
@@ -273,26 +318,33 @@ subshellMaxElectrons = fmap (*2) subshellOrbitals
 subshellOrbitals :: [Int]
 subshellOrbitals = [1, 3, 5, 7, 9]
 
+-- Get concrete number of orbitals by id
+subshellOrbital :: OrbitalId -> Int
+subshellOrbital = (subshellOrbitals !!) . fromEnum
+
+layerOrbitals :: [Int]
+layerOrbitals = scanl1 (+) subshellOrbitals
+
 
 -- Turn atom into the next excited state
-excite :: [(Int, Int, Int)] -> Maybe [(Int, Int, Int)]
+excite :: [OrbitalState] -> Maybe [OrbitalState]
 excite conf = fmap removeEmptyShells excConf
   where
-    highestPaired :: [(Int, Int, Int)] -> Maybe Int
-    highestPaired = listToMaybe . reverse . findIndices (\(_, s, e) -> (subshellOrbitals !! (s - 1)) < e)
+    highestPaired :: [OrbitalState] -> Maybe Int
+    highestPaired = listToMaybe . reverse . findIndices (\(State _ s e) -> subshellOrbital s < e)
 
-    lowestFree :: [(Int, Int, Int)] -> Maybe Int
-    lowestFree = findIndex (\(_, s, e) -> (subshellOrbitals !! (s - 1)) > e)
+    lowestFree :: [OrbitalState] -> Maybe Int
+    lowestFree = findIndex (\(State _ s e) -> subshellOrbital s > e)
 
-    increase (l, s, e) = (l, s, e + 1)
-    decrease (l, s, e) = (l, s, e - 1)
+    increase (State l s e) = State l s (e + 1)
+    decrease (State l s e) = State l s (e - 1)
 
     expConf = appendEmptyShells conf
 
     excConf = case (highestPaired &&& lowestFree) expConf of
       (Nothing, _)     -> Nothing
       (_, Nothing)     -> Nothing
-      (Just h, Just l) -> if (conf !! h) ^._1 == (expConf !! l) ^._1
+      (Just h, Just l) -> if orbitalLayer (conf !! h) == orbitalLayer (expConf !! l)
                           then
                             Just
                               . toList
@@ -302,49 +354,78 @@ excite conf = fmap removeEmptyShells excConf
                           else
                             Nothing
 
--- | Generate all possible electron configs (unexcited and excited) with given number of electrons
-possibleElectronConfigs :: Int -> [[(Int, Int, Int)]]
-possibleElectronConfigs e = fillShells e : unfoldr helper (fillShells e)
-  where
-    helper x = do
-      res <- excite x
-      return (res, res)
+
+possibleOrbitalStates :: [OrbitalState] -> [[OrbitalState]]
+possibleOrbitalStates s = s : unfoldr helper s
+  where helper x = do
+          res <- excite x
+          return (res, res)
+
+-- | Generate all possible electron configs (unexcited and excited) for a given element
+possibleElectronConfigs :: Element -> [[OrbitalState]]
+possibleElectronConfigs Element { atomicNumber=e } = possibleOrbitalStates $ fillShells e
+possibleElectronConfigs Unknown = []
+
+-- remove electrons from the highest layer (useful for ionization)
+-- if it is impossible to take given number of electrons, returns Nothing
+removeHighest :: Int -> [OrbitalState] -> Maybe [OrbitalState]
+removeHighest 0 s = return s
+removeHighest n s = do
+  True <- return . not $ null s
+  let hLayer = maximum $ fmap orbitalLayer s
+
+  let sublayersIdx = findIndices ((==hLayer) . orbitalLayer) s
+  True <- return . not $ null sublayersIdx
+
+  let curIdx = maximum sublayersIdx
+  let curSublayer = s !! curIdx
+  let newSublayer = curSublayer { orbitalElectrons=orbitalElectrons curSublayer - 1 }
+  let newState = case orbitalElectrons newSublayer of
+        0 -> filter (/= curSublayer) s
+        _ -> toList . update curIdx newSublayer $ fromList s
+  removeHighest (n-1) newState
+
+-- | Generate all possible electron configs (unexcited and excited) for a given ion
+-- | By now it assumes that removing electrons starts from the highest layer,
+-- | whereas adding electrons follows the same way as while moving along periodic table
+possibleIonElectronConfigs :: Ion -> [[OrbitalState]]
+possibleIonElectronConfigs (Ion e c) | c < 0 = possibleElectronConfigs $ element (atomicNumber e - c)
+                                     | c > 0 = maybe [] possibleOrbitalStates (removeHighest c . fillShells $ atomicNumber e)
+                                     | otherwise = possibleElectronConfigs e
 
 -- Generate possible config for a given subshell id.
 -- The order is based on Aufbau principle.
 -- http://en.wikipedia.org/wiki/Aufbau_principle
 -- Return ordered list of shell number with subshell id.
 shellConfigGen :: OrbitalId -> [(Int, OrbitalId)]
-shellConfigGen n = [(i,m-i) | m <- [2..n+n], i <- [((m+1) `div` 2)..m-1] ]
+shellConfigGen oid = [(i, toEnum (m - i - 1)) |
+                      m <- [2 .. n + n],
+                      i <- [((m + 1) `div` 2) .. m - 1] ]
+  where n = fromEnum oid
 
 
 -- Appends sublayers which don't carry any electron in the ground state
 -- but could carry in excited state
-appendEmptyShells :: [(Int, Int, Int)] -> [(Int, Int, Int)]
+appendEmptyShells :: [OrbitalState] -> [OrbitalState]
 appendEmptyShells conf = conf ++ addSublayers
-  where
-    maxLayer = maximum (fmap (^._1) conf)
-    maxSublayer = maximum ((^._2) <$> filter ((==maxLayer) . (^._1)) conf)
-    addSublayers = fmap (\x -> (maxLayer, x, 0)) [(maxSublayer + 1) .. maxLayer]
+  where maxLayer = maximum (fmap orbitalLayer conf)
+        maxSublayer = fromEnum $ maximum (orbitalSublayer <$> filter ((==maxLayer) . orbitalLayer) conf)
+        addSublayers = fmap (\x -> State maxLayer (toEnum x) 0) [(maxSublayer + 1) .. maxLayer - 1]
 
 
 -- Do the opposite of the function above
-removeEmptyShells :: [(Int, Int, Int)] -> [(Int, Int, Int)]
-removeEmptyShells = filter ((/= 0) . (^._3))
+removeEmptyShells :: [OrbitalState] -> [OrbitalState]
+removeEmptyShells = filter ((/= 0) . orbitalElectrons)
 
 
 -- Fill shells up to given number of electrons.
--- This function only fills subshells up to 'g' (id=5)
-fillShells :: Int -> [( Int         -- Shell number
-                      , OrbitalId  -- Shell type
-                      , Int         -- #Electrons
-                        )]
-fillShells = f (shellConfigGen 5)
-    where
-        f :: [(Int, OrbitalId)] -> Int -> [(Int, OrbitalId, Int)]
-        f [] _ = []
-        f ((i,j):xs) m | m == 0 = []
-                       | m < l = [(i, j, m)]
-                       | otherwise = (i, j, l) : f xs (m - l)
-            where
-                l = subshellMaxElectrons !! (j-1)
+-- This function only fills subshells up to 'g'
+fillShells :: Int -> [OrbitalState]
+fillShells = f (shellConfigGen G)
+    where f :: [(Int, OrbitalId)] -> Int -> [OrbitalState]
+          f [] _ = []
+          f ((i,j) : xs) m | m == 0 = []
+                           | m <= l = [State i j m]
+                           | otherwise = State i j l : f xs (m - l)
+              where
+                  l = subshellOrbital j * 2

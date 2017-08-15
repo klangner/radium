@@ -134,21 +134,6 @@ spec = do
     it "Possible valences for xenon"
       (possibleValences (element 54) `shouldBe` [0, 2, 4, 6, 8])
 
-    it "Possible valences for Hafnium"
-      (possibleValences (element 72) `shouldBe` [0, 2])
-
-    it "Possible valences for Copper"
-      (possibleValences (element 29) `shouldBe` [1])
-
-    it "Possible valences for Cobalt"
-      (possibleValences (element 27) `shouldBe` [0, 2])
-
-    it "Possible valences for Platinum"
-      (possibleValences (element 78) `shouldBe` [1])
-
-    it "Possible valences for Gadolinium"
-      (possibleValences (element 64) `shouldBe` [0, 2])
-
   describe "Test ion valences" $ do
     it "Possible valences for C+"
       (possibleIonValences (Ion (element 6) 1) `shouldBe` [1, 3] )

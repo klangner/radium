@@ -40,7 +40,7 @@ import           Data.Function (on)
 import           Data.List     (findIndex, findIndices, groupBy, sortOn,
                                 unfoldr)
 import qualified Data.Map      as Map
-import           Data.Maybe    (listToMaybe)
+import           Data.Maybe    (fromMaybe, listToMaybe)
 import           Data.Sequence (fromList, update)
 
 
@@ -249,25 +249,25 @@ rn = xe ++ [os 6 S 2, os 4 F 14, os 5 D 10, os 6 P 6]
 
 -- Electron configuration exceptions to Aufbau principle
 configExceptions :: Map.Map Int [OrbitalState]
-configExceptions = Map.fromList [ (24, ar ++ [os 4 S 1, os 3 D 5])
-                                , (29, ar ++ [os 4 S 1, os 3 D 10])
-                                , (41, kr ++ [os 5 S 1, os 4 D 4])
-                                , (42, kr ++ [os 5 S 1, os 4 D 5])
-                                , (44, kr ++ [os 5 S 1, os 4 D 7])
-                                , (45, kr ++ [os 5 S 1, os 4 D 8])
-                                , (46, kr ++ [os 4 D 10])
-                                , (47, kr ++ [os 5 S 1, os 4 D 10])
-                                , (57, xe ++ [os 6 S 2, os 5 D 1])
-                                , (58, xe ++ [os 6 S 2, os 4 F 1, os 5 D 1])
-                                , (64, xe ++ [os 6 S 2, os 4 F 7, os 5 D 1])
-                                , (78, xe ++ [os 6 S 1, os 4 F 14, os 5 D 9])
-                                , (79, xe ++ [os 6 S 1, os 4 F 14, os 5 D 10])
-                                , (89, rn ++ [os 7 S 2, os 6 D 1])
-                                , (90, rn ++ [os 7 S 2, os 6 D 2])
-                                , (91, rn ++ [os 7 S 2, os 5 F 2, os 6 D 1])
-                                , (92, rn ++ [os 7 S 2, os 5 F 3, os 6 D 1])
-                                , (93, rn ++ [os 7 S 2, os 5 F 4, os 6 D 1])
-                                , (96, rn ++ [os 7 S 2, os 5 F 7, os 6 D 1])]
+configExceptions = Map.fromList [ (24, ar ++ [os 4 S 1, os 3 D 5])  -- Cromium
+                                , (29, ar ++ [os 4 S 1, os 3 D 10])  -- Copper
+                                , (41, kr ++ [os 5 S 1, os 4 D 4])  -- Niobium
+                                , (42, kr ++ [os 5 S 1, os 4 D 5])  -- Molybdenium
+                                , (44, kr ++ [os 5 S 1, os 4 D 7])  -- Ruthenium
+                                , (45, kr ++ [os 5 S 1, os 4 D 8])  -- Rhodium
+                                , (46, kr ++ [os 4 D 10])  -- Palladium
+                                , (47, kr ++ [os 5 S 1, os 4 D 10])  -- Silver
+                                , (57, xe ++ [os 6 S 2, os 5 D 1])  -- Lanthanum
+                                , (58, xe ++ [os 6 S 2, os 4 F 1, os 5 D 1])  -- Cerium
+                                , (64, xe ++ [os 6 S 2, os 4 F 7, os 5 D 1])  -- Gadolinium
+                                , (78, xe ++ [os 6 S 1, os 4 F 14, os 5 D 9])  -- Platinum
+                                , (79, xe ++ [os 6 S 1, os 4 F 14, os 5 D 10])  -- Gold
+                                , (89, rn ++ [os 7 S 2, os 6 D 1])  -- Actinium
+                                , (90, rn ++ [os 7 S 2, os 6 D 2])  -- Thorium
+                                , (91, rn ++ [os 7 S 2, os 5 F 2, os 6 D 1])  -- Proactinium
+                                , (92, rn ++ [os 7 S 2, os 5 F 3, os 6 D 1])  -- Uranium
+                                , (93, rn ++ [os 7 S 2, os 5 F 4, os 6 D 1])  -- Neptunium
+                                , (96, rn ++ [os 7 S 2, os 5 F 7, os 6 D 1])]  -- Curium
 
 -- | Show number of electrons in each shell
 --   For elements which are exception to Aufbau principle configuration is given manually
@@ -317,19 +317,66 @@ covalentBounds :: Element -> Int
 covalentBounds e = min n (8 - n)
   where n = valenceElectrons e
 
+-- The problem here is that (n-1) d is very close to n s
+valenceExceptions :: Map.Map Int [Int]
+valenceExceptions = Map.fromList $ [(21, [3])
+                                  , (22, [4])
+                                  , (23, [2 .. 5])
+                                  , (24, [2, 3, 6])
+                                  , (25, [2, 3, 4, 6, 7])
+                                  , (26, [2, 3])
+                                  , (27, [2, 3])
+                                  , (28, [2])
+                                  , (29, [1, 2])
+                                  , (30, [2])
+                                  , (39, [3])
+                                  , (40, [4])
+                                  , (41, [5])
+                                  , (42, [4, 6])
+                                  , (43, [4, 7])
+                                  , (44, [3, 4])
+                                  , (45, [3])
+                                  , (46, [2, 4])
+                                  , (47, [1])
+                                  , (48, [2])
+                                  , (57, [3])
+                                  , (58, [3, 4])]
+                                  ++ zip [59 .. 62] (repeat [3])
+                                  ++ [(63, [2, 3])]
+                                  ++ zip [64 .. 71] (repeat [3])
+                                  ++ [ (72, [4])
+                                  , (73, [5])
+                                  , (74, [4, 6])
+                                  , (75, [4])
+                                  , (76, [4])
+                                  , (77, [3, 4])
+                                  , (78, [2, 4])
+                                  , (79, [1, 3])
+                                  , (80, [2])]
 
 -- | Get list of all possible coordination numbers (valences)
 possibleValences :: Element -> [Int]
-possibleValences el = valenceHelper <$> possibleElectronConfigs el
+possibleValences el = fromMaybe usualVal $ Map.lookup n valenceExceptions
+  where usualVal = valenceHelper <$> possibleElectronConfigs el
+        n = atomicNumber el
 
 -- | Get list of all possible valences for an ion
 possibleIonValences :: Ion -> [Int]
 possibleIonValences i = valenceHelper <$> possibleIonElectronConfigs i
 
 valenceHelper :: [OrbitalState] -> Int
-valenceHelper ss = foldr val 0 $ filter (isOnLast ss) ss
+valenceHelper ss = foldr val 0 $ filter subshellCond ss
   where valSub s e = if e < subshellOrbital s then e else subshellOrbital s * 2 - e
         val (State _ s e) b = b + valSub s e
+
+        lastL = maximum $ fmap orbitalLayer ss
+
+        subshellCond :: OrbitalState -> Bool
+        subshellCond (State l s _) = (l == lastL) ||
+                                     (l == lastL - 1 && s == D) ||
+                                     (l == lastL - 2 && s == F) ||
+                                     (l == lastL - 3 && s == G) ||
+                                     (l == lastL - 4 && s == H)
 
 
 -- s sub-shell consists of only 1 orbital.
@@ -454,11 +501,14 @@ removeEmptyShells = filter ((/= 0) . orbitalElectrons)
 fillShells :: Int -> [OrbitalState]
 fillShells n = case Map.lookup n configExceptions of
   Just val -> val
-  _ -> f (shellConfigGen H) n
-          where f :: [(Int, OrbitalId)] -> Int -> [OrbitalState]
-                f [] _ = []
-                f ((i,j) : xs) m | m == 0 = []
-                                 | m <= l = [State i j m]
-                                 | otherwise = State i j l : f xs (m - l)
-                    where
-                        l = subshellOrbital j * 2
+  _        -> fillShellsAufbau n
+
+fillShellsAufbau :: Int -> [OrbitalState]
+fillShellsAufbau = f (shellConfigGen H)
+  where f :: [(Int, OrbitalId)] -> Int -> [OrbitalState]
+        f [] _ = []
+        f ((i,j) : xs) m | m == 0 = []
+                         | m <= l = [State i j m]
+                         | otherwise = State i j l : f xs (m - l)
+            where
+                l = subshellOrbital j * 2

@@ -24,13 +24,6 @@ module Radium.Element ( Element(..)
                       , possibleIonValences
                       , possibleValences
                       , valenceElectrons
-
-                      , appendEmptyShells
-                      , fillShells
-                      , excite
-                      , highestPaired
-                      , lowestFree
-                      , os
                       ) where
 
 import           Control.Arrow ((&&&))
@@ -344,7 +337,7 @@ valenceExceptions = Map.fromList $ [(21, [3])
                                   ++ zip [59 .. 62] (repeat [3])
                                   ++ [(63, [2, 3])]
                                   ++ zip [64 .. 71] (repeat [3])
-                                  ++ [ (72, [4])
+                                  ++ [(72, [4])
                                   , (73, [5])
                                   , (74, [4, 6])
                                   , (75, [4])
@@ -365,18 +358,9 @@ possibleIonValences :: Ion -> [Int]
 possibleIonValences i = valenceHelper <$> possibleIonElectronConfigs i
 
 valenceHelper :: [OrbitalState] -> Int
-valenceHelper ss = foldr val 0 $ filter subshellCond ss
+valenceHelper ss = foldr val 0 $ filter (isOnLast ss) ss
   where valSub s e = if e < subshellOrbital s then e else subshellOrbital s * 2 - e
         val (State _ s e) b = b + valSub s e
-
-        lastL = maximum $ fmap orbitalLayer ss
-
-        subshellCond :: OrbitalState -> Bool
-        subshellCond (State l s _) = (l == lastL) ||
-                                     (l == lastL - 1 && s == D) ||
-                                     (l == lastL - 2 && s == F) ||
-                                     (l == lastL - 3 && s == G) ||
-                                     (l == lastL - 4 && s == H)
 
 
 -- s sub-shell consists of only 1 orbital.

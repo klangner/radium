@@ -27,10 +27,13 @@ module Radium.Element ( Element(..)
                       ) where
 
 import           Control.Arrow ((&&&))
+import           Control.Monad (liftM2)
 import           Data.Foldable (toList)
-import           Data.List     (findIndex, findIndices, unfoldr)
+import           Data.Function (on)
+import           Data.List     (findIndex, findIndices, groupBy, sortOn,
+                                unfoldr)
 import qualified Data.Map      as Map
-import           Data.Maybe    (listToMaybe)
+import           Data.Maybe    (fromMaybe, listToMaybe)
 import           Data.Sequence (fromList, update)
 
 
@@ -71,7 +74,9 @@ data OrbitalState = State {
   orbitalLayer     :: Int,
   orbitalSublayer  :: OrbitalId,
   orbitalElectrons :: Int
-} deriving (Show, Eq)
+} deriving (Eq)
+instance Show OrbitalState where
+  show (State l s e) = "State" ++ " " ++ show l ++ " " ++ show s ++ " " ++ show e
 
 -- Periodic Table
 ptable :: [Element]
@@ -217,26 +222,45 @@ elementBySymbol ns = f ns ptable
           f xs (e:es) | symbol e == xs = e
                       | otherwise = f xs es
 
+
+-- write a one-letter alias for State constructor for the following function
+os :: Int -> OrbitalId -> Int -> OrbitalState
+os = State
+
+-- and finished configuration of Ar, Kr, Xe and Rn
+ar :: [OrbitalState]
+ar = [os 1 S 2, os 2 S 2, os 2 P 6, os 3 S 2, os 3 P 6]
+
+kr :: [OrbitalState]
+kr = ar ++ [os 4 S 2, os 3 D 10, os 4 P 6]
+
+xe :: [OrbitalState]
+xe = kr ++ [os 5 S 2, os 4 D 10, os 5 P 6]
+
+rn :: [OrbitalState]
+rn = xe ++ [os 6 S 2, os 4 F 14, os 5 D 10, os 6 P 6]
+
 -- Electron configuration exceptions to Aufbau principle
-configExceptions :: Map.Map Int [Int]
-configExceptions = Map.fromList [ (24, [2, 8, 13, 1])
-                                , (29, [2, 8, 18, 1])
-                                , (41, [2, 8, 18, 12, 1])
-                                , (42, [2, 8, 18, 13, 1])
-                                , (44, [2, 8, 18, 15, 1])
-                                , (45, [2, 8, 18, 16, 1])
-                                , (46, [2, 8, 18, 18])
-                                , (47, [2, 8, 18, 18, 1])
-                                , (57, [2, 8, 18, 18, 9, 2])
-                                , (58, [2, 8, 18, 19, 9, 2])
-                                , (64, [2, 8, 18, 25, 9, 2])
-                                , (79, [2, 8, 18, 32, 18, 1])
-                                , (89, [2, 8, 18, 32, 18, 9, 2])
-                                , (90, [2, 8, 18, 32, 18, 10, 2])
-                                , (91, [2, 8, 18, 32, 20, 9, 2])
-                                , (92, [2, 8, 18, 32, 21, 9, 2])
-                                , (93, [2, 8, 18, 32, 22, 9, 2])
-                                , (96, [2, 8, 18, 32, 25, 9, 2]) ]
+configExceptions :: Map.Map Int [OrbitalState]
+configExceptions = Map.fromList [ (24, ar ++ [os 4 S 1, os 3 D 5])  -- Cromium
+                                , (29, ar ++ [os 4 S 1, os 3 D 10])  -- Copper
+                                , (41, kr ++ [os 5 S 1, os 4 D 4])  -- Niobium
+                                , (42, kr ++ [os 5 S 1, os 4 D 5])  -- Molybdenium
+                                , (44, kr ++ [os 5 S 1, os 4 D 7])  -- Ruthenium
+                                , (45, kr ++ [os 5 S 1, os 4 D 8])  -- Rhodium
+                                , (46, kr ++ [os 4 D 10])  -- Palladium
+                                , (47, kr ++ [os 5 S 1, os 4 D 10])  -- Silver
+                                , (57, xe ++ [os 6 S 2, os 5 D 1])  -- Lanthanum
+                                , (58, xe ++ [os 6 S 2, os 4 F 1, os 5 D 1])  -- Cerium
+                                , (64, xe ++ [os 6 S 2, os 4 F 7, os 5 D 1])  -- Gadolinium
+                                , (78, xe ++ [os 6 S 1, os 4 F 14, os 5 D 9])  -- Platinum
+                                , (79, xe ++ [os 6 S 1, os 4 F 14, os 5 D 10])  -- Gold
+                                , (89, rn ++ [os 7 S 2, os 6 D 1])  -- Actinium
+                                , (90, rn ++ [os 7 S 2, os 6 D 2])  -- Thorium
+                                , (91, rn ++ [os 7 S 2, os 5 F 2, os 6 D 1])  -- Proactinium
+                                , (92, rn ++ [os 7 S 2, os 5 F 3, os 6 D 1])  -- Uranium
+                                , (93, rn ++ [os 7 S 2, os 5 F 4, os 6 D 1])  -- Neptunium
+                                , (96, rn ++ [os 7 S 2, os 5 F 7, os 6 D 1])]  -- Curium
 
 -- | Show number of electrons in each shell
 --   For elements which are exception to Aufbau principle configuration is given manually
@@ -245,13 +269,9 @@ configExceptions = Map.fromList [ (24, [2, 8, 13, 1])
 -- > let e = element 8
 -- > electronConfig e == [2, 6]
 electronConfig :: Element -> [Int]
-electronConfig e = case Map.lookup (atomicNumber e) configExceptions of
-                    Just val -> val
-                    _ -> filter (> 0) $ f (fillShells (atomicNumber e))
-                        where f :: [OrbitalState] -> [Int]
-                              f ss = [sum (g n ss) | n <- [1..m]]
-                                where m = length ss
-                                      g l = map (\(State a _ c) -> if a == l then c else 0)
+electronConfig e = fmap (sum . fmap orbitalElectrons) . groupBy (on (==) orbitalLayer) $ sortOn orbitalLayer filled
+  where
+    filled = fillShells $ atomicNumber e
 
 
 -- | Show number of electrons in each shell for an ionized state of an atom
@@ -290,17 +310,55 @@ covalentBounds :: Element -> Int
 covalentBounds e = min n (8 - n)
   where n = valenceElectrons e
 
+-- The problem here is that (n-1) d is very close to n s
+valenceExceptions :: Map.Map Int [Int]
+valenceExceptions = Map.fromList $ [(21, [3])
+                                  , (22, [4])
+                                  , (23, [2 .. 5])
+                                  , (24, [2, 3, 6])
+                                  , (25, [2, 3, 4, 6, 7])
+                                  , (26, [2, 3])
+                                  , (27, [2, 3])
+                                  , (28, [2])
+                                  , (29, [1, 2])
+                                  , (30, [2])
+                                  , (39, [3])
+                                  , (40, [4])
+                                  , (41, [5])
+                                  , (42, [4, 6])
+                                  , (43, [4, 7])
+                                  , (44, [3, 4])
+                                  , (45, [3])
+                                  , (46, [2, 4])
+                                  , (47, [1])
+                                  , (48, [2])
+                                  , (57, [3])
+                                  , (58, [3, 4])]
+                                  ++ zip [59 .. 62] (repeat [3])
+                                  ++ [(63, [2, 3])]
+                                  ++ zip [64 .. 71] (repeat [3])
+                                  ++ [(72, [4])
+                                  , (73, [5])
+                                  , (74, [4, 6])
+                                  , (75, [4])
+                                  , (76, [4])
+                                  , (77, [3, 4])
+                                  , (78, [2, 4])
+                                  , (79, [1, 3])
+                                  , (80, [2])]
 
 -- | Get list of all possible coordination numbers (valences)
 possibleValences :: Element -> [Int]
-possibleValences el = valenceHelper <$> possibleElectronConfigs el
+possibleValences el = fromMaybe usualVal $ Map.lookup n valenceExceptions
+  where usualVal = valenceHelper <$> possibleElectronConfigs el
+        n = atomicNumber el
 
 -- | Get list of all possible valences for an ion
 possibleIonValences :: Ion -> [Int]
 possibleIonValences i = valenceHelper <$> possibleIonElectronConfigs i
 
 valenceHelper :: [OrbitalState] -> Int
-valenceHelper = foldr val 0
+valenceHelper ss = foldr val 0 $ filter (isOnLast ss) ss
   where valSub s e = if e < subshellOrbital s then e else subshellOrbital s * 2 - e
         val (State _ s e) b = b + valSub s e
 
@@ -310,8 +368,9 @@ valenceHelper = foldr val 0
 -- d sub-shell consists of 5 orbitals.
 -- f sub-shell consists of 7 orbitals.
 -- g sub-shell consists of 9 orbitals.
+-- h sub-shell consists of 11 orbitals.
 subshellOrbitals :: [Int]
-subshellOrbitals = [1, 3, 5, 7, 9]
+subshellOrbitals = [1, 3, 5, 7, 9, 11]
 
 -- Get concrete number of orbitals by id
 subshellOrbital :: OrbitalId -> Int
@@ -320,16 +379,24 @@ subshellOrbital = (subshellOrbitals !!) . fromEnum
 layerOrbitals :: [Int]
 layerOrbitals = scanl1 (+) subshellOrbitals
 
+-- Checks whether given OrbitalState is from the last layer of [OrbitalState]
+isOnLast :: [OrbitalState] -> OrbitalState -> Bool
+isOnLast ss (State l _ _) = l == maximum (fmap orbitalLayer ss)
+
+highestPaired :: [OrbitalState] -> Maybe Int
+highestPaired ss = listToMaybe . reverse $ findIndices (liftM2 (&&) hasPair (isOnLast ss)) ss
+  where
+    hasPair (State _ s e) = subshellOrbital s < e
+
+lowestFree :: [OrbitalState] -> Maybe Int
+lowestFree ss = findIndex (liftM2 (&&) hasHole (isOnLast ss)) ss
+  where
+    hasHole (State _ s e) = subshellOrbital s > e
 
 -- Turn atom into the next excited state
 excite :: [OrbitalState] -> Maybe [OrbitalState]
 excite conf = fmap removeEmptyShells excConf
   where
-    highestPaired :: [OrbitalState] -> Maybe Int
-    highestPaired = listToMaybe . reverse . findIndices (\(State _ s e) -> subshellOrbital s < e)
-
-    lowestFree :: [OrbitalState] -> Maybe Int
-    lowestFree = findIndex (\(State _ s e) -> subshellOrbital s > e)
 
     increase (State l s e) = State l s (e + 1)
     decrease (State l s e) = State l s (e - 1)
@@ -369,7 +436,7 @@ removeHighest n s = do
   True <- return . not $ null s
   let hLayer = maximum $ fmap orbitalLayer s
 
-  let sublayersIdx = findIndices ((==hLayer) . orbitalLayer) s
+  let sublayersIdx = findIndices ((== hLayer) . orbitalLayer) s
   True <- return . not $ null sublayersIdx
 
   let curIdx = maximum sublayersIdx
@@ -414,13 +481,18 @@ removeEmptyShells = filter ((/= 0) . orbitalElectrons)
 
 
 -- Fill shells up to given number of electrons.
--- This function only fills subshells up to 'g'
+-- This function only fills subshells up to 'h'
 fillShells :: Int -> [OrbitalState]
-fillShells = f (shellConfigGen G)
-    where f :: [(Int, OrbitalId)] -> Int -> [OrbitalState]
-          f [] _ = []
-          f ((i,j) : xs) m | m == 0 = []
-                           | m <= l = [State i j m]
-                           | otherwise = State i j l : f xs (m - l)
-              where
-                  l = subshellOrbital j * 2
+fillShells n = case Map.lookup n configExceptions of
+  Just val -> val
+  _        -> fillShellsAufbau n
+
+fillShellsAufbau :: Int -> [OrbitalState]
+fillShellsAufbau = f (shellConfigGen H)
+  where f :: [(Int, OrbitalId)] -> Int -> [OrbitalState]
+        f [] _ = []
+        f ((i,j) : xs) m | m == 0 = []
+                         | m <= l = [State i j m]
+                         | otherwise = State i j l : f xs (m - l)
+            where
+                l = subshellOrbital j * 2

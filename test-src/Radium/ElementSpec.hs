@@ -132,7 +132,7 @@ spec = do
       (possibleValences (element 20) `shouldBe` [0, 2])
 
     it "Possible valences for xenon"
-      (possibleValences (element 54) `shouldBe` [0, 2, 4, 6])
+      (possibleValences (element 54) `shouldBe` [0, 2, 4, 6, 8])
 
   describe "Test ion valences" $ do
     it "Possible valences for C+"
